@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { authApi, clearToken, getToken } from '@/lib/api';
+import { ApiError, authApi, clearToken, getToken, readTokenClaims } from '@/lib/api';
 import type { Role, StaffUser } from '@/lib/types';
 import { LoadingScreen } from '@/components/ui';
 
@@ -33,17 +33,44 @@ export default function StaffShell({ children, requires, title }: {
   const [state, setState] = useState<'loading' | 'ready' | 'denied'>('loading');
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const permitted = (role: Role) => role === 'ADMIN' || requires.includes(role);
+
   useEffect(() => {
     if (!getToken()) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
+
+    // Draw the screen from the claims already in the token rather than
+    // waiting on a round trip. The children mount now, so their own data
+    // request goes out alongside the verification below instead of queueing
+    // behind it — which is what made every staff screen open on a spinner.
+    const claims = readTokenClaims();
+    if (claims) {
+      setUser({ id: claims.sub, name: claims.name, email: '', role: claims.role, is_active: true });
+      setState(permitted(claims.role) ? 'ready' : 'denied');
+    } else {
+      // Missing or expired: nothing worth rendering optimistically.
+      clearToken();
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
+    // The server remains the authority. If the role really differs — or the
+    // token is rejected — this corrects the screen a moment later.
     authApi.me()
       .then(({ user: u }) => {
         setUser(u);
-        setState(u.role === 'ADMIN' || requires.includes(u.role) ? 'ready' : 'denied');
+        setState(permitted(u.role) ? 'ready' : 'denied');
       })
-      .catch(() => router.replace(`/login?next=${encodeURIComponent(pathname)}`));
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) {
+          clearToken();
+          router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+        }
+        // Anything else (offline, a blip) leaves the optimistic view in place
+        // rather than throwing the user out mid-shift.
+      });
     // `requires` is a literal at every call site, so this runs once per screen.
   }, [router, pathname]);
 

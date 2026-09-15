@@ -3,7 +3,7 @@
  * kept in localStorage; guest calls carry the table's QR token instead.
  */
 import type {
-  Bill, Category, DailyMetrics, MenuItem, Order, Settings,
+  Bill, Category, DailyMetrics, MenuItem, Order, Role, Settings,
   StaffUser, TableBoardRow, AppNotification, Totals,
 } from './types';
 
@@ -34,6 +34,36 @@ const TOKEN_KEY = 'resto.staff.token';
 export const getToken = () => (typeof window === 'undefined' ? null : localStorage.getItem(TOKEN_KEY));
 export const setToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
 export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+/**
+ * Read the claims out of the stored JWT without a network call.
+ *
+ * This is a RENDERING hint only — it decides which navigation to draw while
+ * the real check is in flight. It is not, and must never become, an
+ * authorisation decision: the signature is not verified here (the secret
+ * lives on the server) so a tampered token would produce whatever claims the
+ * holder wrote. Every API call is still authorised server-side, and
+ * StaffShell reconciles against /api/auth/me as soon as it answers.
+ */
+export function readTokenClaims(): { sub: string; role: Role; name: string } | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const json = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')
+        .padEnd(payload.length + ((4 - (payload.length % 4)) % 4), '=')),
+    );
+    // An expired token should send the user to sign in, not render a shell
+    // that will 401 on every request.
+    if (typeof json.exp === 'number' && json.exp * 1000 <= Date.now()) return null;
+    if (!json.sub || !json.role) return null;
+    return { sub: json.sub, role: json.role as Role, name: json.name ?? '' };
+  } catch {
+    return null;
+  }
+}
 
 export class ApiError extends Error {
   status: number;

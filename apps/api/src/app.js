@@ -35,6 +35,11 @@ export function createApp() {
       return cb(err);
     },
     credentials: true,
+    // Every request carrying an Authorization header triggers a preflight.
+    // Without this the browser repeats that round trip before *each* call,
+    // which on a cross-origin API behind a CDN costs more than the request
+    // itself. Chrome caps the cache at 2h, Firefox honours the full day.
+    maxAge: 86_400,
   }));
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
