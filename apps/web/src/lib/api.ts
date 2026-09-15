@@ -7,7 +7,28 @@ import type {
   StaffUser, TableBoardRow, AppNotification, Totals,
 } from './types';
 
+declare global {
+  interface Window { __RESTO_API_URL__?: string }
+}
+
+/**
+ * Where the API lives. Resolved per call, in this order:
+ *
+ *   1. window.__RESTO_API_URL__  — served by /env.js at request time, so the
+ *      server's API_URL wins even against a stale build
+ *   2. NEXT_PUBLIC_API_URL       — compiled in at build time
+ *   3. localhost                 — local development
+ */
+export function apiUrl(): string {
+  if (typeof window !== 'undefined' && window.__RESTO_API_URL__) {
+    return window.__RESTO_API_URL__.replace(/\/$/, '');
+  }
+  return (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+}
+
+/** @deprecated read at module load, so it misses the runtime value — call apiUrl(). */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 const TOKEN_KEY = 'resto.staff.token';
 
 export const getToken = () => (typeof window === 'undefined' ? null : localStorage.getItem(TOKEN_KEY));
@@ -30,7 +51,7 @@ async function request<T>(path: string, options: RequestInit & { auth?: boolean 
   const { auth = true, headers, ...rest } = options;
   const token = auth ? getToken() : null;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${apiUrl()}${path}`, {
     ...rest,
     credentials: 'include',
     headers: {

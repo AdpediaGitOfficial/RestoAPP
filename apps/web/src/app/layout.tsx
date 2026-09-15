@@ -18,6 +18,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Runtime API URL — see app/env.js/route.ts. Must run before hydration. */}
+        <script src="/env.js" />
+      </head>
       <body>{children}</body>
     </html>
   );

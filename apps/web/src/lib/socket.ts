@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { io, type Socket } from 'socket.io-client';
-import { API_URL, getToken } from './api';
+import { apiUrl, getToken } from './api';
 
 type Handlers = Record<string, (payload: any) => void>;
 
@@ -17,7 +17,7 @@ export function useRealtime(handlers: Handlers, opts: { sessionId?: string | nul
   const { sessionId, tableId, staff } = opts;
 
   useEffect(() => {
-    const socket: Socket = io(API_URL, {
+    const socket: Socket = io(apiUrl(), {
       transports: ['websocket', 'polling'],
       auth: {
         token: staff ? getToken() : undefined,

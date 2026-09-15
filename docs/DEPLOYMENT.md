@@ -5,31 +5,41 @@ how most small restaurants will run this.
 
 ---
 
-## The one gotcha that catches everyone
+## Pointing the web app at the API
 
-**`NEXT_PUBLIC_API_URL` is baked into the web bundle at build time, not read
-at runtime.** Next.js inlines every `NEXT_PUBLIC_*` value during `next build`.
-
-Setting it in pm2, systemd or `.env` *after* building does nothing — the
-browser will still call whatever URL was present when you built, usually
-`http://localhost:4000`, which fails on a real domain (and is blocked as
-mixed content on an HTTPS page).
-
-Whenever the API URL changes, **rebuild the web app**:
+Set `API_URL` in the web app's environment and restart. **No rebuild needed.**
 
 ```bash
 cd apps/web
-NEXT_PUBLIC_API_URL=https://api.your-domain.com npm run build
-pm2 restart resto-web
+API_URL=https://api.your-domain.com pm2 restart resto-web --update-env
 ```
 
-Check what actually got compiled in:
+The browser fetches this per request from `/env.js`, so the running
+process's value always wins:
+
+```bash
+curl -s https://resto.your-domain.com/env.js
+# window.__RESTO_API_URL__="https://api.your-domain.com";
+```
+
+If that prints the wrong URL, the environment variable did not reach the
+process — check `pm2 env <id>` and remember `--update-env`.
+
+### Why this exists
+
+`NEXT_PUBLIC_*` values are compiled into the bundle by `next build`, so
+setting `NEXT_PUBLIC_API_URL` after building does nothing: the browser keeps
+calling whatever URL was present at build time, usually `http://localhost:4000`.
+That fails on a real domain and is blocked as mixed content on HTTPS, with no
+useful error. `API_URL` at runtime avoids the whole trap.
+
+`NEXT_PUBLIC_API_URL` still works as a build-time default, and a production
+build warns when it is missing or points at localhost. To see what a bundle
+baked in:
 
 ```bash
 grep -rho 'https\?://[^"]*' apps/web/.next/static/chunks/*.js | sort -u | head
 ```
-
-If you see `localhost:4000` there, the build is stale.
 
 ---
 
@@ -101,10 +111,11 @@ PUBLIC_WEB_URL=https://resto.your-domain.com
 PRINTER_DRIVER=none
 ```
 
-### Web (build-time)
+### Web (`apps/web` process environment)
 
 ```bash
-NEXT_PUBLIC_API_URL=https://api.your-domain.com
+# Read at runtime and served to the browser via /env.js
+API_URL=https://api.your-domain.com
 ```
 
 ### Cookies across domains
@@ -183,10 +194,9 @@ server {
 # API
 cd apps/api && pm2 start npm --name resto-api -- start
 
-# Web — build first, with the API URL set
-cd apps/web
-NEXT_PUBLIC_API_URL=https://api.your-domain.com npm run build
-pm2 start npm --name resto-web -- start
+# Web — API_URL is read at runtime, so it can change without a rebuild
+cd apps/web && npm run build
+API_URL=https://api.your-domain.com pm2 start npm --name resto-web -- start
 
 pm2 save && pm2 startup
 ```
@@ -197,8 +207,8 @@ Deploying a new version:
 git pull
 npm install
 npm run db:migrate
-cd apps/web && NEXT_PUBLIC_API_URL=https://api.your-domain.com npm run build && cd ../..
-pm2 restart resto-api resto-web
+cd apps/web && npm run build && cd ../..
+pm2 restart resto-api resto-web --update-env
 npm run doctor -- https://api.your-domain.com
 ```
 
@@ -238,7 +248,7 @@ curl -s -X POST https://api.your-domain.com/api/auth/login \
 
 | What you see | Cause | Fix |
 |---|---|---|
-| Request goes to `localhost:4000` | Web built without the API URL | Rebuild with `NEXT_PUBLIC_API_URL` |
+| Request goes to `localhost:4000` | `API_URL` not reaching the process | `pm2 restart resto-web --update-env`, then check `/env.js` |
 | `CORS_ORIGIN_NOT_ALLOWED` | Web origin missing from the allowlist | Add it to `CORS_ORIGINS`, restart the API |
 | Blocked as mixed content | API URL is `http://` on an HTTPS page | Use `https://` |
 | 404 on the login call | Path has a `/v1` in it | Drop it — `POST /api/auth/login` |
