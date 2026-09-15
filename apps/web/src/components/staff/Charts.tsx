@@ -96,13 +96,13 @@ export function TrendChart({ data }: { data: { date: string; revenue: number; bi
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-28 w-full" role="img" aria-label="Revenue trend">
         <polyline
           points={`0,${h} ${points.join(' ')} ${w},${h}`}
-          fill="rgb(226 55 68 / 0.12)"
+          fill="rgb(217 43 60 / 0.12)"
           stroke="none"
         />
         <polyline
           points={points.join(' ')}
           fill="none"
-          stroke="rgb(204 33 54)"
+          stroke="rgb(192 31 50)"
           strokeWidth="1.2"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"

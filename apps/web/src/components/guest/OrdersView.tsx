@@ -17,7 +17,7 @@ const STEPS: { key: string; label: string; icon: IconName }[] = [
 function Tracker({ status }: { status: string }) {
   if (status === 'CANCELLED') {
     return (
-      <div className="rounded-2xl bg-brand-50 px-3 py-2 text-xs font-bold text-brand-700 ring-1 ring-brand-200">
+      <div className="rounded-2xl bg-brand-50 px-3 py-2 text-xs font-normal text-brand-700 ring-1 ring-brand-200">
         This order was cancelled — please speak to our staff.
       </div>
     );
@@ -38,14 +38,14 @@ function Tracker({ status }: { status: string }) {
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition ${
                   active ? 'bg-brand-500 text-white animate-pulse-ring'
                     : done ? 'bg-brand-500 text-white'
-                    : 'bg-ink-100 text-ink-400'
+                    : 'bg-ink-100 text-ink-500'
                 }`}
               >
                 <Icon name={done && !active ? 'check' : step.icon} className="h-3.5 w-3.5" strokeWidth={2.2} />
               </span>
               <span className={`h-0.5 flex-1 ${i === STEPS.length - 1 ? 'bg-transparent' : i < current ? 'bg-brand-500' : 'bg-ink-200'}`} />
             </div>
-            <span className={`mt-1.5 text-[10px] font-normal tracking-tight ${active ? 'text-brand-600' : done ? 'text-ink-600' : 'text-ink-400'}`}>
+            <span className={`mt-1.5 text-[10px] font-normal tracking-tight ${active ? 'text-brand-600' : done ? 'text-ink-600' : 'text-ink-500'}`}>
               {step.label}
             </span>
           </div>
@@ -71,11 +71,11 @@ export default function OrdersView({
   if (orders.length === 0) {
     return (
       <div className="px-4 py-16 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-400">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-500">
           <Icon name="receipt" className="h-7 w-7" />
         </span>
         <p className="mt-4 text-[17px] font-bold text-ink-800">Nothing ordered yet</p>
-        <p className="mt-1 text-sm text-ink-500">Your orders and their progress will appear here.</p>
+        <p className="mt-1 text-sm text-ink-600">Your orders and their progress will appear here.</p>
         <button type="button" onClick={onAddMore} className="btn-primary mt-6">Browse the menu</button>
       </div>
     );
@@ -91,7 +91,7 @@ export default function OrdersView({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-500" />
           </span>
-          <p className="text-[13px] font-bold text-brand-800">
+          <p className="text-[13px] font-normal text-brand-800">
             {live.length} {live.length === 1 ? 'order is' : 'orders are'} with the kitchen
           </p>
         </div>
@@ -105,10 +105,10 @@ export default function OrdersView({
         >
           <header className="flex items-center justify-between px-4 pb-3 pt-4">
             <div>
-              <p className="text-[14px] font-bold tracking-[-0.01em] text-ink-900">Order #{order.order_number}</p>
-              <p className="text-[11.5px] text-ink-400">{time(order.created_at)}</p>
+              <p className="text-[14px] font-normal tracking-[-0.01em] text-ink-800">Order #{order.order_number}</p>
+              <p className="text-[11.5px] text-ink-500">{time(order.created_at)}</p>
             </div>
-            <span className="text-[14px] font-bold tabular-nums text-ink-900">{money(order.subtotal, symbol)}</span>
+            <span className="text-[14px] font-bold tabular-nums text-ink-800">{money(order.subtotal, symbol)}</span>
           </header>
 
           <div className="px-4 pb-4">
@@ -126,7 +126,7 @@ export default function OrdersView({
                     <span className="font-bold">{item.quantity}×</span> {item.item_name}
                   </p>
                   {(item.variant_name || item.addons?.length > 0) && (
-                    <p className="truncate text-[11px] text-ink-400">
+                    <p className="truncate text-[11px] text-ink-500">
                       {[item.variant_name, ...(item.addons ?? []).map((a) => a.name)].filter(Boolean).join(' · ')}
                     </p>
                   )}
@@ -138,7 +138,7 @@ export default function OrdersView({
           </ul>
 
           {order.note && (
-            <p className="border-t border-ink-100 bg-ink-50 px-4 py-2 text-xs text-ink-500">Note: {order.note}</p>
+            <p className="border-t border-ink-100 bg-ink-50 px-4 py-2 text-xs text-ink-600">Note: {order.note}</p>
           )}
         </article>
       ))}
@@ -151,30 +151,30 @@ export default function OrdersView({
         </div>
         <dl className="space-y-2 p-4 text-sm">
           <div className="flex justify-between">
-            <dt className="text-ink-500">Subtotal</dt>
+            <dt className="text-ink-600">Subtotal</dt>
             <dd className="font-normal text-ink-800">{money(totals.subtotal, symbol)}</dd>
           </div>
           {totals.service_charge_amount > 0 && (
             <div className="flex justify-between">
-              <dt className="text-ink-500">Service charge ({totals.service_charge_percent}%)</dt>
+              <dt className="text-ink-600">Service charge ({totals.service_charge_percent}%)</dt>
               <dd className="font-normal text-ink-800">{money(totals.service_charge_amount, symbol)}</dd>
             </div>
           )}
           {totals.tax_amount > 0 && (
             <div className="flex justify-between">
-              <dt className="text-ink-500">{taxLabel} ({totals.tax_percent}%){totals.tax_inclusive && ' — included'}</dt>
+              <dt className="text-ink-600">{taxLabel} ({totals.tax_percent}%){totals.tax_inclusive && ' — included'}</dt>
               <dd className="font-normal text-ink-800">{money(totals.tax_amount, symbol)}</dd>
             </div>
           )}
           {totals.rounding_adjustment !== 0 && (
             <div className="flex justify-between">
-              <dt className="text-ink-500">Rounding</dt>
+              <dt className="text-ink-600">Rounding</dt>
               <dd className="font-normal text-ink-800">{money(totals.rounding_adjustment, symbol)}</dd>
             </div>
           )}
           <div className="flex items-baseline justify-between border-t border-dashed border-ink-200 pt-3">
-            <dt className="text-[15px] font-bold text-ink-900">Total</dt>
-            <dd className="text-[26px] font-bold tabular-nums tracking-tight text-ink-900">{money(totals.total, symbol)}</dd>
+            <dt className="text-[15px] font-bold text-ink-800">Total</dt>
+            <dd className="text-[26px] font-bold tabular-nums tracking-tight text-ink-800">{money(totals.total, symbol)}</dd>
           </div>
         </dl>
       </section>

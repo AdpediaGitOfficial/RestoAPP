@@ -49,7 +49,7 @@ function CartRow({ entry, symbol, onQuantity }: {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] font-bold tracking-[-0.01em] text-ink-900">{entry.name}</p>
+          <p className="truncate text-[14px] font-normal tracking-[-0.01em] text-ink-800">{entry.name}</p>
 
           {options.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
@@ -63,7 +63,7 @@ function CartRow({ entry, symbol, onQuantity }: {
 
           {entry.note && <p className="mt-1 truncate text-[11px] italic text-brand-600">“{entry.note}”</p>}
 
-          <p className="mt-1.5 text-[14px] font-bold tabular-nums text-ink-900">{money(entry.unitPrice * entry.quantity, symbol)}</p>
+          <p className="mt-1.5 text-[14px] font-bold tabular-nums text-ink-800">{money(entry.unitPrice * entry.quantity, symbol)}</p>
         </div>
 
         <QtyStepper value={entry.quantity} onChange={(n) => onQuantity(entry.key, n)} min={0} max={30} />
@@ -105,11 +105,11 @@ export default function ReviewView({
   if (entries.length === 0) {
     return (
       <div className="px-4 py-16 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-400">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-500">
           <Icon name="tray" className="h-7 w-7" />
         </span>
         <p className="mt-4 text-[17px] font-bold text-ink-800">Your tray is empty</p>
-        <p className="mt-1 text-sm text-ink-500">Add a few things from the menu and they will show up here.</p>
+        <p className="mt-1 text-sm text-ink-600">Add a few things from the menu and they will show up here.</p>
         <button type="button" onClick={onAddMore} className="btn-primary mt-6">Browse the menu</button>
       </div>
     );
@@ -120,16 +120,16 @@ export default function ReviewView({
       {/* ------------------------------------------------- table & guest */}
       <div className="card divide-y divide-ink-100">
         <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-sm text-ink-500">You&apos;re at</span>
-          <span className="text-sm font-bold text-ink-900">{tableLabel}</span>
+          <span className="text-sm text-ink-600">You&apos;re at</span>
+          <span className="text-sm font-normal text-ink-800">{tableLabel}</span>
         </div>
 
         <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <span className="shrink-0 text-sm text-ink-500">Your name</span>
+          <span className="shrink-0 text-sm text-ink-600">Your name</span>
           {editingName ? (
             <input
               autoFocus
-              className="min-w-0 flex-1 rounded-xl bg-ink-50 px-3 py-1.5 text-right text-sm font-bold text-ink-900 ring-1 ring-brand-400 focus:outline-none"
+              className="min-w-0 flex-1 rounded-xl bg-ink-50 px-3 py-1.5 text-right text-sm font-normal text-ink-800 ring-1 ring-brand-400 focus:outline-none"
               value={nameDraft}
               maxLength={40}
               placeholder="Add your name"
@@ -143,9 +143,9 @@ export default function ReviewView({
             <button
               type="button"
               onClick={() => { setNameDraft(guestName); setEditingName(true); }}
-              className="flex items-center gap-1.5 text-sm font-bold text-ink-900 active:opacity-60"
+              className="flex items-center gap-1.5 text-sm font-normal text-ink-800 active:opacity-60"
             >
-              {guestName || <span className="font-normal text-ink-400">Add your name</span>}
+              {guestName || <span className="font-normal text-ink-500">Add your name</span>}
               <Icon name="pencil" className="h-3.5 w-3.5 text-brand-500" />
             </button>
           )}
@@ -155,8 +155,8 @@ export default function ReviewView({
       {/* ---------------------------------------------------- order lines */}
       <section aria-label="Your order">
         <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Your order</h2>
-          <span className="text-xs font-normal text-ink-400">{count} {count === 1 ? 'item' : 'items'}</span>
+          <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-800">Your order</h2>
+          <span className="text-xs font-normal text-ink-500">{count} {count === 1 ? 'item' : 'items'}</span>
         </div>
 
         <ul className="space-y-2">
@@ -190,32 +190,32 @@ export default function ReviewView({
 
       {/* ------------------------------------------------------- details */}
       <section className="card p-4" aria-label="Bill details">
-        <h2 className="text-[13.5px] font-bold tracking-[-0.01em] text-ink-900">Bill details</h2>
+        <h2 className="text-[13.5px] font-bold tracking-[-0.01em] text-ink-800">Bill details</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
-            <dt className="text-ink-500">Total items</dt>
+            <dt className="text-ink-600">Total items</dt>
             <dd className="font-normal text-ink-800">{count}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-ink-500">Subtotal</dt>
+            <dt className="text-ink-600">Subtotal</dt>
             <dd className="font-normal text-ink-800">{money(subtotal, symbol)}</dd>
           </div>
           {serviceCharge > 0 && (
             <div className="flex justify-between">
-              <dt className="text-ink-500">Service charge ({serviceChargePercent}%)</dt>
+              <dt className="text-ink-600">Service charge ({serviceChargePercent}%)</dt>
               <dd className="font-normal text-ink-800">{money(serviceCharge, symbol)}</dd>
             </div>
           )}
           <div className="flex justify-between">
-            <dt className="text-ink-500">{taxLabel} ({taxPercent}%){taxInclusive && ' — included'}</dt>
+            <dt className="text-ink-600">{taxLabel} ({taxPercent}%){taxInclusive && ' — included'}</dt>
             <dd className="font-normal text-ink-800">{money(tax, symbol)}</dd>
           </div>
           <div className="flex justify-between border-t border-dashed border-ink-200 pt-2.5">
-            <dt className="text-[15px] font-bold text-ink-900">This order</dt>
-            <dd className="text-[19px] font-bold tabular-nums tracking-tight text-ink-900">{money(estimate, symbol)}</dd>
+            <dt className="text-[15px] font-bold text-ink-800">This order</dt>
+            <dd className="text-[19px] font-bold tabular-nums tracking-tight text-ink-800">{money(estimate, symbol)}</dd>
           </div>
         </dl>
-        <p className="mt-2.5 text-[11px] leading-relaxed text-ink-400">
+        <p className="mt-2.5 text-[11px] leading-relaxed text-ink-500">
           An estimate for what you&apos;re adding now. Your final bill covers everything ordered at this table.
         </p>
       </section>

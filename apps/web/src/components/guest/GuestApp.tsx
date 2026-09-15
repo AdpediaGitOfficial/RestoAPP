@@ -167,8 +167,8 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-8 text-center">
         <p className="text-5xl" aria-hidden>📵</p>
-        <h1 className="mt-4 text-xl font-bold text-ink-900">We could not find this table</h1>
-        <p className="mt-2 text-sm text-ink-500">
+        <h1 className="mt-4 text-xl font-bold text-ink-800">We could not find this table</h1>
+        <p className="mt-2 text-sm text-ink-600">
           {infoError instanceof Error ? infoError.message : 'Please ask our staff to help you scan again.'}
         </p>
       </main>
@@ -203,7 +203,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
       <header data-guest-header className="sticky top-0 z-30 bg-ink-50/95 backdrop-blur-xl" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
         <div className="mx-auto max-w-2xl px-4 pb-3 pt-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex min-w-0 items-center gap-2 text-[13.5px] font-bold tracking-[-0.01em] text-ink-900">
+            <span className="flex min-w-0 items-center gap-2 text-[13.5px] font-normal tracking-[-0.01em] text-ink-800">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-[11px] font-bold text-white">
                 {(info?.restaurant.name ?? 'R')[0]}
               </span>
@@ -212,7 +212,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
 
             <span className="flex shrink-0 items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1.5 text-[12px] font-normal text-ink-700 ring-1 ring-ink-200">
-                <Icon name="table" className="h-3.5 w-3.5 text-ink-400" />
+                <Icon name="table" className="h-3.5 w-3.5 text-ink-500" />
                 {info?.table.label}
               </span>
               <button
@@ -220,7 +220,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
                 onClick={callWaiter}
                 aria-label="Call a member of staff"
                 title="Call a member of staff"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink-500 ring-1 ring-ink-200 transition active:scale-90 hover:text-brand-600"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink-600 ring-1 ring-ink-200 transition active:scale-90 hover:text-brand-600"
               >
                 <Icon name="bell" className="h-[17px] w-[17px]" />
               </button>
@@ -229,7 +229,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
 
           {/* Step rail — where the guest is in the flow. */}
           <div className="mt-3 flex items-center gap-2">
-            <h1 className="flex-1 truncate text-[21px] font-bold leading-tight tracking-[-0.022em] text-ink-900">{meta.title}</h1>
+            <h1 className="flex-1 truncate text-[21px] font-bold leading-tight tracking-[-0.022em] text-ink-800">{meta.title}</h1>
             <div className="flex shrink-0 gap-1" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
@@ -255,8 +255,8 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
                   type="button"
                   onClick={() => goTo(key)}
                   aria-current={step === key}
-                  className={`flex-1 rounded-xl px-3 py-2 text-[12.5px] font-bold transition ${
-                    step === key ? 'bg-white text-ink-900 shadow-sm' : 'text-ink-500'
+                  className={`flex-1 rounded-xl px-3 py-2 text-[12.5px] font-normal transition ${
+                    step === key ? 'bg-white text-ink-800 shadow-sm' : 'text-ink-600'
                   }`}
                 >
                   {label}
@@ -276,7 +276,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
           </div>
         )}
         {billRequested && !settled && (
-          <div className="flex items-center gap-2.5 rounded-2xl bg-brand-50 px-4 py-3 text-[13px] font-bold text-brand-800 ring-1 ring-brand-200">
+          <div className="flex items-center gap-2.5 rounded-2xl bg-brand-50 px-4 py-3 text-[13px] font-normal text-brand-800 ring-1 ring-brand-200">
             <Icon name="receipt" className="h-4 w-4 shrink-0 text-brand-500" />
             Bill requested — a supervisor is on the way.
           </div>
@@ -356,8 +356,8 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
         >
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[11.5px] font-normal text-ink-500">Running total</p>
-              <p className="text-[19px] font-bold leading-tight tabular-nums tracking-tight text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
+              <p className="text-[11.5px] font-normal text-ink-600">Running total</p>
+              <p className="text-[19px] font-bold leading-tight tabular-nums tracking-tight text-ink-800">{money(live?.totals.total ?? 0, symbol)}</p>
             </div>
             <button type="button" onClick={() => goTo('orders')} className="btn-secondary py-3">Track orders</button>
           </div>
@@ -370,14 +370,14 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
       <Sheet open={billOpen} onClose={() => setBillOpen(false)} title="Ask for the bill">
         <div className="space-y-4">
           <div className="rounded-2xl bg-ink-50 p-4 text-center">
-            <p className="text-[13px] font-normal text-ink-500">Amount due</p>
-            <p className="mt-1 text-[30px] font-bold tabular-nums tracking-tight text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
-            <p className="mt-1 text-xs text-ink-500">
+            <p className="text-[13px] font-normal text-ink-600">Amount due</p>
+            <p className="mt-1 text-[30px] font-bold tabular-nums tracking-tight text-ink-800">{money(live?.totals.total ?? 0, symbol)}</p>
+            <p className="mt-1 text-xs text-ink-600">
               Includes {info?.restaurant.tax_label} and any charges. A supervisor will bring the final bill.
             </p>
           </div>
 
-          <p className="text-sm font-bold text-ink-700">How would you like to pay?</p>
+          <p className="text-sm font-normal text-ink-700">How would you like to pay?</p>
           <div className="grid grid-cols-2 gap-2">
             {([
               ['UPI', 'UPI', 'phone'],
@@ -391,7 +391,7 @@ export default function GuestApp({ token, initialTable = null, initialMenu = nul
                 onClick={() => requestBill(value)}
                 className="btn-secondary flex-col gap-1.5 py-4"
               >
-                <Icon name={icon} className="h-5 w-5 text-ink-400" />
+                <Icon name={icon} className="h-5 w-5 text-ink-500" />
                 {label}
               </button>
             ))}

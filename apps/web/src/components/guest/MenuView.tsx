@@ -146,7 +146,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       <div className="px-4 pt-1">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500">
               <Icon name="search" className="h-[18px] w-[18px]" />
             </span>
             <input
@@ -166,7 +166,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
             className={`flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-2xl transition active:scale-95 ${
               filtersOpen || diet || sort !== 'recommended'
                 ? 'bg-brand-500 text-white shadow-pill'
-                : 'bg-white text-ink-500 ring-1 ring-ink-200'
+                : 'bg-white text-ink-600 ring-1 ring-ink-200'
             }`}
           >
             <Icon name="sliders" className="h-[18px] w-[18px]" />
@@ -223,8 +223,8 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       {!filtering && picks.length > 0 && (
         <section className="mt-5" aria-label="Popular right now">
           <div className="flex items-baseline justify-between px-4">
-            <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Popular right now</h2>
-            <span className="text-xs font-normal text-ink-400">{picks.length} picks</span>
+            <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-800">Popular right now</h2>
+            <span className="text-xs font-normal text-ink-500">{picks.length} picks</span>
           </div>
 
           <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto px-4 pb-2">
@@ -247,8 +247,8 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
                   </span>
                 </div>
                 <div className="p-3 pt-4">
-                  <p className="line-clamp-1 text-[13.5px] font-bold tracking-[-0.01em] text-ink-900">{item.name}</p>
-                  <p className="mt-0.5 text-[13.5px] font-bold tabular-nums text-ink-900">{money(item.price, symbol)}</p>
+                  <p className="line-clamp-1 text-[13.5px] font-normal tracking-[-0.01em] text-ink-800">{item.name}</p>
+                  <p className="mt-0.5 text-[13.5px] font-bold tabular-nums text-ink-800">{money(item.price, symbol)}</p>
                 </div>
               </button>
             ))}
@@ -259,19 +259,19 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       {/* ---------------------------------------------------------- the grid */}
       <div className="mt-5 space-y-7">
         {filtering && (
-          <p className="px-4 text-sm text-ink-500">
-            <span className="font-bold text-ink-900">{resultCount}</span> {resultCount === 1 ? 'dish' : 'dishes'}
+          <p className="px-4 text-sm text-ink-600">
+            <span className="font-bold text-ink-800">{resultCount}</span> {resultCount === 1 ? 'dish' : 'dishes'}
             {query && <> matching “{search.trim()}”</>}
           </p>
         )}
 
         {shaped.length === 0 ? (
           <div className="px-4 py-14 text-center">
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-100 text-ink-400">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-100 text-ink-500">
               <Icon name="search" className="h-6 w-6" />
             </span>
             <p className="mt-4 font-bold text-ink-800">Nothing matched that</p>
-            <p className="mt-1 text-sm text-ink-500">Try another dish, or clear the filters.</p>
+            <p className="mt-1 text-sm text-ink-600">Try another dish, or clear the filters.</p>
             <button
               type="button"
               onClick={() => { setSearch(''); setDiet(null); setSort('recommended'); setActiveCategory('ALL'); }}
@@ -292,10 +292,10 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
               className={index > 0 ? 'defer-paint' : undefined}
             >
               <div className="px-4">
-                <h2 id={`h-${category.id}`} className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">
+                <h2 id={`h-${category.id}`} className="text-[17px] font-bold tracking-[-0.015em] text-ink-800">
                   {category.name}
                 </h2>
-                {category.description && <p className="mt-0.5 text-[13px] text-ink-500">{category.description}</p>}
+                {category.description && <p className="mt-0.5 text-[13px] text-ink-600">{category.description}</p>}
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3 px-4">
@@ -324,7 +324,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       )}
 
       {ordersPlaced > 0 && (
-        <p className="mt-8 px-4 text-center text-xs text-ink-400">
+        <p className="mt-8 px-4 text-center text-xs text-ink-500">
           Already ordered {ordersPlaced} {ordersPlaced === 1 ? 'round' : 'rounds'} — everything lands on one bill.
         </p>
       )}

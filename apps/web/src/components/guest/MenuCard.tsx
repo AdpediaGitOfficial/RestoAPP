@@ -74,19 +74,19 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
       <div className="flex flex-1 flex-col p-3.5 pt-4">
         <div className="flex items-start gap-1.5">
           <span className="mt-[3px]"><VegMark type={item.food_type} /></span>
-          <h3 className="line-clamp-2 flex-1 text-[14.5px] font-bold leading-[1.3] tracking-[-0.01em] text-ink-900">
+          <h3 className="line-clamp-2 flex-1 text-[14.5px] font-normal leading-[1.3] tracking-[-0.01em] text-ink-800">
             {item.name}
           </h3>
         </div>
 
         {item.description && (
-          <p className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-ink-500">{item.description}</p>
+          <p className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-ink-600">{item.description}</p>
         )}
 
         {/* Metadata sits above the price so every card's price shares a
             baseline, however much copy the dish above it has. */}
         {(showOptionHint || item.spice_level > 0) && (
-          <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-normal text-ink-400">
+          <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-normal text-ink-500">
             {showOptionHint && <span>Choose extras</span>}
             {item.spice_level > 0 && (
               <span className="inline-flex items-center gap-0.5 text-brand-500">
@@ -99,10 +99,10 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
         )}
 
         <div className="mt-auto flex items-baseline gap-1.5 pt-2.5">
-          <span className="text-[15px] font-bold tabular-nums tracking-tight text-ink-900">
+          <span className="text-[15px] font-bold tabular-nums tracking-tight text-ink-800">
             {money(item.price, symbol)}
           </span>
-          {item.variants?.length > 0 && <span className="text-[11px] text-ink-400">onwards</span>}
+          {item.variants?.length > 0 && <span className="text-[11px] text-ink-500">onwards</span>}
         </div>
       </div>
     </button>

@@ -82,9 +82,9 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-4 pt-4">
-          <h2 className="text-[21px] font-bold leading-tight tracking-[-0.02em] text-ink-900">{item.name}</h2>
-          {item.description && <p className="mt-2 text-[13.5px] leading-[1.55] text-ink-500">{item.description}</p>}
-          <div className="mt-3 flex items-center gap-3 text-[11.5px] font-normal text-ink-400">
+          <h2 className="text-[21px] font-bold leading-tight tracking-[-0.02em] text-ink-800">{item.name}</h2>
+          {item.description && <p className="mt-2 text-[13.5px] leading-[1.55] text-ink-600">{item.description}</p>}
+          <div className="mt-3 flex items-center gap-3 text-[11.5px] font-normal text-ink-500">
             <span className="inline-flex items-center gap-1.5">
               <Icon name="clock" className="h-3.5 w-3.5" />
               about {item.prep_minutes} min

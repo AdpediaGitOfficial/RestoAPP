@@ -8,13 +8,21 @@ export default {
         // Crimson — the appetite colour, and the one the reference apps lean on.
         brand: {
           50: '#FFF1F2', 100: '#FFE1E4', 200: '#FFC7CD', 300: '#FF9DA8',
-          400: '#FA6678', 500: '#E23744', 600: '#CC2136', 700: '#AB182C',
+          // 500 is the fill behind white text on buttons, badges and the
+          // active pill. #E23744 gave 4.32:1 — just under the 4.5 AA needs —
+          // so it steps down to a shade that clears it at 4.8 and is
+          // indistinguishable side by side.
+          400: '#FA6678', 500: '#D92B3C', 600: '#C01F32', 700: '#A3182A',
           800: '#8C1828', 900: '#761826',
         },
+        // Text never reaches pure black: the darkest step used for type is
+        // ink-800 (#2F2F35, ~13:1 on white), which keeps headings authoritative
+        // without the harshness of #000 on a phone screen in a lit room.
+        // ink-900 is reserved for dark surfaces.
         ink: {
-          50: '#F7F7F8', 100: '#EEEEF1', 200: '#DEDFE3', 300: '#C2C4CB',
-          400: '#8E919C', 500: '#6B6E7A', 600: '#4E515C', 700: '#3A3C45',
-          800: '#24262C', 900: '#14161A',
+          50: '#F7F7F8', 100: '#EEEEF1', 200: '#E2E2E6', 300: '#C9C9D0',
+          400: '#8B8B94', 500: '#6A6A73', 600: '#53535B', 700: '#414147',
+          800: '#2F2F35', 900: '#1E1E23',
         },
       },
       fontFamily: {
@@ -27,7 +35,7 @@ export default {
         card: '0 1px 2px rgb(20 22 26 / 0.04), 0 4px 16px -4px rgb(20 22 26 / 0.08)',
         lift: '0 2px 4px rgb(20 22 26 / 0.04), 0 12px 32px -8px rgb(20 22 26 / 0.16)',
         bar: '0 -4px 24px -8px rgb(20 22 26 / 0.16)',
-        pill: '0 4px 14px -2px rgb(226 55 68 / 0.45)',
+        pill: '0 4px 14px -2px rgb(217 43 60 / 0.42)',
       },
       keyframes: {
         'slide-up': { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
@@ -43,9 +51,9 @@ export default {
         },
         shimmer: { '100%': { transform: 'translateX(100%)' } },
         'pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgb(226 55 68 / 0.45)' },
-          '70%': { boxShadow: '0 0 0 14px rgb(226 55 68 / 0)' },
-          '100%': { boxShadow: '0 0 0 0 rgb(226 55 68 / 0)' },
+          '0%': { boxShadow: '0 0 0 0 rgb(217 43 60 / 0.45)' },
+          '70%': { boxShadow: '0 0 0 14px rgb(217 43 60 / 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgb(217 43 60 / 0)' },
         },
         'scan-line': {
           '0%, 100%': { transform: 'translateY(-38px)' },

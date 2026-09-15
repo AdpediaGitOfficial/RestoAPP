@@ -27,11 +27,11 @@ export default function CartBar({ count, subtotal, symbol, onReview, onPeek }: {
           onClick={onPeek}
           className="flex min-w-0 flex-col items-start rounded-xl px-1 py-0.5 text-left active:opacity-70"
         >
-          <span className="flex items-center gap-1 text-[11.5px] font-normal text-ink-500">
+          <span className="flex items-center gap-1 text-[11.5px] font-normal text-ink-600">
             {count} {count === 1 ? 'item' : 'items'} added
             <Icon name="chevronDown" className="h-3 w-3" strokeWidth={2.2} />
           </span>
-          <span className="text-[19px] font-bold leading-tight tabular-nums tracking-tight text-ink-900">
+          <span className="text-[19px] font-bold leading-tight tabular-nums tracking-tight text-ink-800">
             {money(subtotal, symbol)}
           </span>
         </button>
