@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Brew & Bite — Table Ordering',
-  description: 'Scan, order and pay from your table. Kitchen, floor and admin in one place.',
+  title: 'Scan · Order · Pay',
+  description: 'Order straight from your table — browse the menu, send it to the kitchen and settle the bill without waiting.',
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Order' },
 };
 
 export const viewport: Viewport = {
@@ -11,7 +12,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#bb541f',
+  themeColor: '#E23744',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

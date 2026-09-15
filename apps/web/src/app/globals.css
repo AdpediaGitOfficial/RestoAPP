@@ -7,38 +7,60 @@
 html, body { height: 100%; }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
-  /* Respect the notch / home indicator on phones. */
+  @apply bg-ink-50 text-ink-900 antialiased;
   padding-top: env(safe-area-inset-top, 0px);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Let the guest scroll the menu without rubber-banding the whole page. */
+/* Horizontal rails (categories, deals) scroll without a visible bar. */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
-           transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold
+           transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
   }
-  .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
-  .btn-secondary { @apply btn bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50; }
-  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100; }
-  .btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
-  .btn-sm { @apply px-3 py-1.5 text-xs; }
+  .btn-primary { @apply btn bg-brand-500 text-white shadow-pill hover:bg-brand-600; }
+  .btn-secondary { @apply btn bg-white text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50; }
+  .btn-ghost { @apply btn text-ink-600 hover:bg-ink-100; }
+  .btn-danger { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
+  .btn-sm { @apply rounded-xl px-3.5 py-2 text-xs; }
 
-  .card { @apply rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70; }
+  .card { @apply rounded-3xl bg-white shadow-card; }
+  .card-flat { @apply rounded-2xl bg-white ring-1 ring-ink-100; }
+
   .input {
-    @apply w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200
-           placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500;
+    @apply w-full rounded-2xl border-0 bg-white px-4 py-3.5 text-sm text-ink-900 ring-1 ring-ink-200
+           placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-brand-500;
   }
-  .label { @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500; }
-  .chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1; }
-  .table-head { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500; }
-  .table-cell { @apply px-4 py-3 text-sm text-slate-700; }
+  .label { @apply mb-1.5 block text-xs font-bold uppercase tracking-wider text-ink-500; }
+
+  /* Filter / category pills — the rail that runs under the search field. */
+  .pill {
+    @apply shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all
+           duration-150 active:scale-95;
+  }
+  .pill-on { @apply pill bg-brand-500 text-white shadow-pill; }
+  .pill-off { @apply pill bg-white text-ink-500 ring-1 ring-ink-200; }
+
+  .chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1; }
+
+  /* Display headings: the oversized, friendly voice of the guest screens. */
+  .display { @apply text-[27px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink-900; }
+
+  .table-head { @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-ink-500; }
+  .table-cell { @apply px-4 py-3 text-sm text-ink-700; }
+
+  /* Loading placeholder with a light sweep across it. */
+  .skeleton { @apply relative overflow-hidden bg-ink-100; }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r
+           from-transparent via-white/70 to-transparent;
+    content: '';
+  }
 }
 
-/* Thermal tickets and bills print on their own, without the app chrome. */
 @media print {
   .no-print { display: none !important; }
   body { @apply bg-white; padding: 0; }
@@ -47,4 +69,12 @@ body {
     font-size: 12px; line-height: 1.35; white-space: pre; margin: 0; padding: 0;
   }
   @page { margin: 4mm; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
