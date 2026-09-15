@@ -224,7 +224,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
         <section className="mt-5" aria-label="Popular right now">
           <div className="flex items-baseline justify-between px-4">
             <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Popular right now</h2>
-            <span className="text-xs font-medium text-ink-400">{picks.length} picks</span>
+            <span className="text-xs font-normal text-ink-400">{picks.length} picks</span>
           </div>
 
           <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto px-4 pb-2">
@@ -238,7 +238,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
               >
                 <div className="relative aspect-[5/4] w-full">
                   <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} className="rounded-t-3xl" />
-                  <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                  <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
                     <Icon name="star" className="h-2.5 w-2.5" />
                     Popular
                   </span>
@@ -247,7 +247,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
                   </span>
                 </div>
                 <div className="p-3 pt-4">
-                  <p className="line-clamp-1 text-[13.5px] font-semibold tracking-[-0.01em] text-ink-900">{item.name}</p>
+                  <p className="line-clamp-1 text-[13.5px] font-bold tracking-[-0.01em] text-ink-900">{item.name}</p>
                   <p className="mt-0.5 text-[13.5px] font-bold tabular-nums text-ink-900">{money(item.price, symbol)}</p>
                 </div>
               </button>
@@ -270,7 +270,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-100 text-ink-400">
               <Icon name="search" className="h-6 w-6" />
             </span>
-            <p className="mt-4 font-semibold text-ink-800">Nothing matched that</p>
+            <p className="mt-4 font-bold text-ink-800">Nothing matched that</p>
             <p className="mt-1 text-sm text-ink-500">Try another dish, or clear the filters.</p>
             <button
               type="button"

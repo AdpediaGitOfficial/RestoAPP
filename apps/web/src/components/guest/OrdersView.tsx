@@ -45,7 +45,7 @@ function Tracker({ status }: { status: string }) {
               </span>
               <span className={`h-0.5 flex-1 ${i === STEPS.length - 1 ? 'bg-transparent' : i < current ? 'bg-brand-500' : 'bg-ink-200'}`} />
             </div>
-            <span className={`mt-1.5 text-[10px] font-medium tracking-tight ${active ? 'text-brand-600' : done ? 'text-ink-600' : 'text-ink-400'}`}>
+            <span className={`mt-1.5 text-[10px] font-normal tracking-tight ${active ? 'text-brand-600' : done ? 'text-ink-600' : 'text-ink-400'}`}>
               {step.label}
             </span>
           </div>
@@ -74,7 +74,7 @@ export default function OrdersView({
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-400">
           <Icon name="receipt" className="h-7 w-7" />
         </span>
-        <p className="mt-4 text-[17px] font-semibold text-ink-800">Nothing ordered yet</p>
+        <p className="mt-4 text-[17px] font-bold text-ink-800">Nothing ordered yet</p>
         <p className="mt-1 text-sm text-ink-500">Your orders and their progress will appear here.</p>
         <button type="button" onClick={onAddMore} className="btn-primary mt-6">Browse the menu</button>
       </div>
@@ -91,7 +91,7 @@ export default function OrdersView({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-500" />
           </span>
-          <p className="text-[13px] font-semibold text-brand-800">
+          <p className="text-[13px] font-bold text-brand-800">
             {live.length} {live.length === 1 ? 'order is' : 'orders are'} with the kitchen
           </p>
         </div>
@@ -105,7 +105,7 @@ export default function OrdersView({
         >
           <header className="flex items-center justify-between px-4 pb-3 pt-4">
             <div>
-              <p className="text-[14px] font-semibold tracking-[-0.01em] text-ink-900">Order #{order.order_number}</p>
+              <p className="text-[14px] font-bold tracking-[-0.01em] text-ink-900">Order #{order.order_number}</p>
               <p className="text-[11.5px] text-ink-400">{time(order.created_at)}</p>
             </div>
             <span className="text-[14px] font-bold tabular-nums text-ink-900">{money(order.subtotal, symbol)}</span>
@@ -122,8 +122,8 @@ export default function OrdersView({
                   <FoodTile name={item.item_name} size="sm" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink-800">
-                    <span className="font-extrabold">{item.quantity}×</span> {item.item_name}
+                  <p className="truncate text-sm font-normal text-ink-800">
+                    <span className="font-bold">{item.quantity}×</span> {item.item_name}
                   </p>
                   {(item.variant_name || item.addons?.length > 0) && (
                     <p className="truncate text-[11px] text-ink-400">
@@ -132,7 +132,7 @@ export default function OrdersView({
                   )}
                   {item.note && <p className="truncate text-[11px] italic text-brand-600">“{item.note}”</p>}
                 </div>
-                <span className="shrink-0 text-sm font-semibold text-ink-600">{money(item.line_total, symbol)}</span>
+                <span className="shrink-0 text-sm font-normal text-ink-600">{money(item.line_total, symbol)}</span>
               </li>
             ))}
           </ul>
@@ -147,33 +147,33 @@ export default function OrdersView({
       <section className="card overflow-hidden" aria-label="Running bill">
         <div className="flex items-center gap-2 bg-ink-900 px-4 py-3.5">
           <Icon name="receipt" className="h-4 w-4 text-white/60" />
-          <h2 className="text-[13.5px] font-semibold tracking-[-0.01em] text-white">Your bill so far</h2>
+          <h2 className="text-[13.5px] font-bold tracking-[-0.01em] text-white">Your bill so far</h2>
         </div>
         <dl className="space-y-2 p-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-ink-500">Subtotal</dt>
-            <dd className="font-semibold text-ink-800">{money(totals.subtotal, symbol)}</dd>
+            <dd className="font-normal text-ink-800">{money(totals.subtotal, symbol)}</dd>
           </div>
           {totals.service_charge_amount > 0 && (
             <div className="flex justify-between">
               <dt className="text-ink-500">Service charge ({totals.service_charge_percent}%)</dt>
-              <dd className="font-semibold text-ink-800">{money(totals.service_charge_amount, symbol)}</dd>
+              <dd className="font-normal text-ink-800">{money(totals.service_charge_amount, symbol)}</dd>
             </div>
           )}
           {totals.tax_amount > 0 && (
             <div className="flex justify-between">
               <dt className="text-ink-500">{taxLabel} ({totals.tax_percent}%){totals.tax_inclusive && ' — included'}</dt>
-              <dd className="font-semibold text-ink-800">{money(totals.tax_amount, symbol)}</dd>
+              <dd className="font-normal text-ink-800">{money(totals.tax_amount, symbol)}</dd>
             </div>
           )}
           {totals.rounding_adjustment !== 0 && (
             <div className="flex justify-between">
               <dt className="text-ink-500">Rounding</dt>
-              <dd className="font-semibold text-ink-800">{money(totals.rounding_adjustment, symbol)}</dd>
+              <dd className="font-normal text-ink-800">{money(totals.rounding_adjustment, symbol)}</dd>
             </div>
           )}
           <div className="flex items-baseline justify-between border-t border-dashed border-ink-200 pt-3">
-            <dt className="text-[15px] font-semibold text-ink-900">Total</dt>
+            <dt className="text-[15px] font-bold text-ink-900">Total</dt>
             <dd className="text-[26px] font-bold tabular-nums tracking-tight text-ink-900">{money(totals.total, symbol)}</dd>
           </div>
         </dl>
@@ -184,7 +184,7 @@ export default function OrdersView({
           <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white">
             <Icon name="check" className="h-5 w-5" strokeWidth={2.4} />
           </span>
-          <p className="mt-2.5 text-[14px] font-semibold text-emerald-900">Paid in full — thank you!</p>
+          <p className="mt-2.5 text-[14px] font-bold text-emerald-900">Paid in full — thank you!</p>
           <p className="mt-0.5 text-xs text-emerald-700">Bill {bill.bill_number} · {money(bill.total, symbol)}</p>
         </div>
       )}

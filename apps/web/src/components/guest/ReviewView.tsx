@@ -49,12 +49,12 @@ function CartRow({ entry, symbol, onQuantity }: {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-ink-900">{entry.name}</p>
+          <p className="truncate text-[14px] font-bold tracking-[-0.01em] text-ink-900">{entry.name}</p>
 
           {options.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
               {options.map((o) => (
-                <span key={o} className="rounded-md bg-ink-100 px-1.5 py-0.5 text-[11px] font-medium text-ink-600">
+                <span key={o} className="rounded-md bg-ink-100 px-1.5 py-0.5 text-[11px] font-normal text-ink-600">
                   {o}
                 </span>
               ))}
@@ -108,7 +108,7 @@ export default function ReviewView({
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-400">
           <Icon name="tray" className="h-7 w-7" />
         </span>
-        <p className="mt-4 text-[17px] font-semibold text-ink-800">Your tray is empty</p>
+        <p className="mt-4 text-[17px] font-bold text-ink-800">Your tray is empty</p>
         <p className="mt-1 text-sm text-ink-500">Add a few things from the menu and they will show up here.</p>
         <button type="button" onClick={onAddMore} className="btn-primary mt-6">Browse the menu</button>
       </div>
@@ -145,7 +145,7 @@ export default function ReviewView({
               onClick={() => { setNameDraft(guestName); setEditingName(true); }}
               className="flex items-center gap-1.5 text-sm font-bold text-ink-900 active:opacity-60"
             >
-              {guestName || <span className="font-medium text-ink-400">Add your name</span>}
+              {guestName || <span className="font-normal text-ink-400">Add your name</span>}
               <Icon name="pencil" className="h-3.5 w-3.5 text-brand-500" />
             </button>
           )}
@@ -156,7 +156,7 @@ export default function ReviewView({
       <section aria-label="Your order">
         <div className="mb-2 flex items-baseline justify-between">
           <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Your order</h2>
-          <span className="text-xs font-medium text-ink-400">{count} {count === 1 ? 'item' : 'items'}</span>
+          <span className="text-xs font-normal text-ink-400">{count} {count === 1 ? 'item' : 'items'}</span>
         </div>
 
         <ul className="space-y-2">
@@ -168,7 +168,7 @@ export default function ReviewView({
         <button
           type="button"
           onClick={onAddMore}
-          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-ink-300 py-3.5 text-[13.5px] font-semibold text-brand-600 transition active:scale-[0.99]"
+          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-ink-300 py-3.5 text-[13.5px] font-bold text-brand-600 transition active:scale-[0.99]"
         >
           <Icon name="plus" className="h-4 w-4" strokeWidth={2.2} />
           Add more items
@@ -190,28 +190,28 @@ export default function ReviewView({
 
       {/* ------------------------------------------------------- details */}
       <section className="card p-4" aria-label="Bill details">
-        <h2 className="text-[13.5px] font-semibold tracking-[-0.01em] text-ink-900">Bill details</h2>
+        <h2 className="text-[13.5px] font-bold tracking-[-0.01em] text-ink-900">Bill details</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt className="text-ink-500">Total items</dt>
-            <dd className="font-semibold text-ink-800">{count}</dd>
+            <dd className="font-normal text-ink-800">{count}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-ink-500">Subtotal</dt>
-            <dd className="font-semibold text-ink-800">{money(subtotal, symbol)}</dd>
+            <dd className="font-normal text-ink-800">{money(subtotal, symbol)}</dd>
           </div>
           {serviceCharge > 0 && (
             <div className="flex justify-between">
               <dt className="text-ink-500">Service charge ({serviceChargePercent}%)</dt>
-              <dd className="font-semibold text-ink-800">{money(serviceCharge, symbol)}</dd>
+              <dd className="font-normal text-ink-800">{money(serviceCharge, symbol)}</dd>
             </div>
           )}
           <div className="flex justify-between">
             <dt className="text-ink-500">{taxLabel} ({taxPercent}%){taxInclusive && ' — included'}</dt>
-            <dd className="font-semibold text-ink-800">{money(tax, symbol)}</dd>
+            <dd className="font-normal text-ink-800">{money(tax, symbol)}</dd>
           </div>
           <div className="flex justify-between border-t border-dashed border-ink-200 pt-2.5">
-            <dt className="text-[15px] font-semibold text-ink-900">This order</dt>
+            <dt className="text-[15px] font-bold text-ink-900">This order</dt>
             <dd className="text-[19px] font-bold tabular-nums tracking-tight text-ink-900">{money(estimate, symbol)}</dd>
           </div>
         </dl>

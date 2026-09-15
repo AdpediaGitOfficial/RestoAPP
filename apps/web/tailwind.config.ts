@@ -17,7 +17,11 @@ export default {
           800: '#24262C', 900: '#14161A',
         },
       },
-      fontFamily: { sans: ['var(--font-sans)', 'system-ui', 'sans-serif'] },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        // The guest app; falls back to the system stack before Lato loads.
+        guest: ['var(--font-guest)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+      },
       borderRadius: { '4xl': '2rem', '5xl': '2.5rem' },
       boxShadow: {
         card: '0 1px 2px rgb(20 22 26 / 0.04), 0 4px 16px -4px rgb(20 22 26 / 0.08)',

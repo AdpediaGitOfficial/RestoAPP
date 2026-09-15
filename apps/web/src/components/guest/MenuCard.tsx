@@ -46,14 +46,14 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
         <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} className="rounded-t-3xl" />
 
         {item.is_recommended && !soldOut && (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-600 shadow-sm backdrop-blur">
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-brand-600 shadow-sm backdrop-blur">
             <Icon name="star" className="h-2.5 w-2.5" />
             Popular
           </span>
         )}
 
         {soldOut && (
-          <span className="absolute inset-0 flex items-center justify-center rounded-t-3xl bg-white/75 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-600 backdrop-blur-[2px]">
+          <span className="absolute inset-0 flex items-center justify-center rounded-t-3xl bg-white/75 text-[11px] font-bold uppercase tracking-[0.08em] text-ink-600 backdrop-blur-[2px]">
             Sold out
           </span>
         )}
@@ -74,7 +74,7 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
       <div className="flex flex-1 flex-col p-3.5 pt-4">
         <div className="flex items-start gap-1.5">
           <span className="mt-[3px]"><VegMark type={item.food_type} /></span>
-          <h3 className="line-clamp-2 flex-1 text-[14.5px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink-900">
+          <h3 className="line-clamp-2 flex-1 text-[14.5px] font-bold leading-[1.3] tracking-[-0.01em] text-ink-900">
             {item.name}
           </h3>
         </div>
@@ -86,7 +86,7 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
         {/* Metadata sits above the price so every card's price shares a
             baseline, however much copy the dish above it has. */}
         {(showOptionHint || item.spice_level > 0) && (
-          <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-medium text-ink-400">
+          <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-normal text-ink-400">
             {showOptionHint && <span>Choose extras</span>}
             {item.spice_level > 0 && (
               <span className="inline-flex items-center gap-0.5 text-brand-500">

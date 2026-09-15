@@ -84,7 +84,7 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
         <div className="flex-1 overflow-y-auto px-5 pb-4 pt-4">
           <h2 className="text-[21px] font-bold leading-tight tracking-[-0.02em] text-ink-900">{item.name}</h2>
           {item.description && <p className="mt-2 text-[13.5px] leading-[1.55] text-ink-500">{item.description}</p>}
-          <div className="mt-3 flex items-center gap-3 text-[11.5px] font-medium text-ink-400">
+          <div className="mt-3 flex items-center gap-3 text-[11.5px] font-normal text-ink-400">
             <span className="inline-flex items-center gap-1.5">
               <Icon name="clock" className="h-3.5 w-3.5" />
               about {item.prep_minutes} min
@@ -111,9 +111,9 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
                   >
                     <span className="flex items-center gap-3">
                       <input type="radio" name="variant" className="h-4 w-4 accent-brand-500" checked={variant?.id === v.id} onChange={() => setVariant(v)} />
-                      <span className="text-[13.5px] font-medium text-ink-800">{v.name}</span>
+                      <span className="text-[13.5px] font-normal text-ink-800">{v.name}</span>
                     </span>
-                    <span className="text-[13.5px] font-semibold tabular-nums text-ink-600">
+                    <span className="text-[13.5px] font-normal tabular-nums text-ink-600">
                       {v.price_delta === 0 ? money(item.price, symbol) : `+${money(v.price_delta, symbol)}`}
                     </span>
                   </label>
@@ -142,9 +142,9 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
                           checked={on}
                           onChange={(e) => setAddonIds((prev) => (e.target.checked ? [...prev, a.id] : prev.filter((id) => id !== a.id)))}
                         />
-                        <span className="text-[13.5px] font-medium text-ink-800">{a.name}</span>
+                        <span className="text-[13.5px] font-normal text-ink-800">{a.name}</span>
                       </span>
-                      <span className="text-[13.5px] font-semibold tabular-nums text-ink-600">+{money(a.price, symbol)}</span>
+                      <span className="text-[13.5px] font-normal tabular-nums text-ink-600">+{money(a.price, symbol)}</span>
                     </label>
                   );
                 })}

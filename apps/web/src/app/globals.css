@@ -100,6 +100,20 @@ body {
   }
 }
 
+/* Lato ships 100/300/400/700/900 — no Medium or Semibold. The shared
+   component classes are written for the system stack the staff screens use,
+   where 500 and 600 are real; inside the guest app they snap to the weights
+   Lato actually has, so the browser never synthesises one. */
+.font-guest .btn,
+.font-guest .chip,
+.font-guest .label,
+.font-guest .display,
+.font-guest .pill-on,
+.font-guest .table-head { font-weight: 700; }
+
+.font-guest .pill-off,
+.font-guest .input { font-weight: 400; }
+
 @media print {
   .no-print { display: none !important; }
   body { @apply bg-white; padding: 0; }

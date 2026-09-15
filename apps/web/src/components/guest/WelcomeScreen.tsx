@@ -25,7 +25,7 @@ export default function WelcomeScreen({ restaurantName, tableLabel, zone, onStar
       </div>
 
       <div className="relative z-10 flex flex-1 flex-col justify-center py-14">
-        <span className="animate-rise-in text-[12px] font-semibold uppercase tracking-[0.22em] text-brand-300">
+        <span className="animate-rise-in text-[12px] font-bold uppercase tracking-[0.22em] text-brand-300">
           {restaurantName}
         </span>
 
@@ -46,7 +46,7 @@ export default function WelcomeScreen({ restaurantName, tableLabel, zone, onStar
             <Icon name="table" className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-white/45">You&apos;re seated at</p>
+            <p className="text-[11px] font-normal uppercase tracking-[0.1em] text-white/45">You&apos;re seated at</p>
             <p className="truncate text-[19px] font-bold tracking-[-0.015em]">{tableLabel}</p>
             <p className="text-[12px] text-white/55">{zone}</p>
           </div>
@@ -63,7 +63,7 @@ export default function WelcomeScreen({ restaurantName, tableLabel, zone, onStar
                 <Icon name={icon} className="h-4 w-4" />
               </span>
               <div className="min-w-0 flex-1 pt-0.5">
-                <p className="text-[13.5px] font-semibold leading-tight tracking-[-0.01em]">
+                <p className="text-[13.5px] font-bold leading-tight tracking-[-0.01em]">
                   <span className="mr-1.5 text-white/35 tabular-nums">{i + 1}</span>{title}
                 </p>
                 <p className="mt-0.5 text-[12px] leading-relaxed text-white/50">{body}</p>
@@ -74,7 +74,7 @@ export default function WelcomeScreen({ restaurantName, tableLabel, zone, onStar
 
         <div className="mt-7 animate-rise-in" style={{ animationDelay: '280ms' }}>
           <label htmlFor="guest-name" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-white/50">
-            Your name <span className="font-medium normal-case tracking-normal text-white/40">(optional)</span>
+            Your name <span className="font-normal normal-case tracking-normal text-white/40">(optional)</span>
           </label>
           <input
             id="guest-name"
