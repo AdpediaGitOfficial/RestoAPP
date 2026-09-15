@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from '@/components/Icon';
+
 export default function QtyStepper({ value, onChange, min = 0, max = 30, tone = 'soft' }: {
   value: number;
   onChange: (n: number) => void;
@@ -18,11 +20,11 @@ export default function QtyStepper({ value, onChange, min = 0, max = 30, tone = 
         aria-label="Decrease quantity"
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        className="px-2.5 py-1.5 text-lg font-bold leading-none transition active:scale-90 disabled:opacity-40"
+        className="flex h-9 w-9 items-center justify-center transition active:scale-90 disabled:opacity-40"
       >
-        −
+        <Icon name="minus" className="h-3.5 w-3.5" strokeWidth={2.4} />
       </button>
-      <span className="min-w-[1.75rem] text-center text-sm font-extrabold tabular-nums" aria-live="polite">
+      <span className="min-w-[1.5rem] text-center text-[13.5px] font-bold tabular-nums" aria-live="polite">
         {value}
       </span>
       <button
@@ -30,9 +32,9 @@ export default function QtyStepper({ value, onChange, min = 0, max = 30, tone = 
         aria-label="Increase quantity"
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        className="px-2.5 py-1.5 text-lg font-bold leading-none transition active:scale-90 disabled:opacity-40"
+        className="flex h-9 w-9 items-center justify-center transition active:scale-90 disabled:opacity-40"
       >
-        +
+        <Icon name="plus" className="h-3.5 w-3.5" strokeWidth={2.4} />
       </button>
     </div>
   );

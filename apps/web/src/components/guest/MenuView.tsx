@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import FoodTile from './FoodTile';
+import Icon from '@/components/Icon';
 import MenuCard from './MenuCard';
 import { money } from '@/lib/format';
 import type { Category, MenuItem } from '@/lib/types';
@@ -15,8 +16,8 @@ const SORTS: { key: Sort; label: string }[] = [
 ];
 
 const DIETS = [
-  { key: 'VEG', label: '🟢 Veg only' },
-  { key: 'NON_VEG', label: '🔴 Non-veg' },
+  { key: 'VEG', label: 'Vegetarian', dot: 'bg-emerald-600' },
+  { key: 'NON_VEG', label: 'Non-vegetarian', dot: 'bg-red-600' },
 ] as const;
 
 export default function MenuView({ categories, symbol, quantityOf, onOpenItem, ordersPlaced }: {
@@ -31,6 +32,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
   const [sort, setSort] = useState<Sort>('recommended');
   const [diet, setDiet] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [visibleCategory, setVisibleCategory] = useState<string | null>(null);
 
   const railRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -70,6 +72,19 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
   const resultCount = shaped.reduce((n, c) => n + c.items.length, 0);
 
   // Track which category the guest has scrolled into, and follow it in the rail.
+  //
+  // The rail lives inside a sticky header, and scrollIntoView resolves an
+  // element against its *static* position — the top of the document — so
+  // calling it here drags the whole page back up on every scroll. Setting
+  // scrollLeft moves only the rail and leaves the page alone.
+  const centreInRail = useCallback((categoryId: string) => {
+    const rail = railRef.current;
+    const pill = rail?.querySelector<HTMLElement>(`[data-cat="${categoryId}"]`);
+    if (!rail || !pill) return;
+    const target = pill.offsetLeft - (rail.clientWidth - pill.offsetWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     if (activeCategory !== 'ALL' || shaped.length === 0) return;
     const observer = new IntersectionObserver(
@@ -79,19 +94,24 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
         if (!top?.target.id) return;
         const id = top.target.id.replace('sec-', '');
-        railRef.current?.querySelector<HTMLElement>(`[data-cat="${id}"]`)
-          ?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        setVisibleCategory(id);
+        centreInRail(id);
       },
       { rootMargin: '-180px 0px -70% 0px' },
     );
     Object.values(sectionRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
-  }, [shaped, activeCategory]);
+  }, [shaped, activeCategory, centreInRail]);
 
   const jumpTo = (id: string) => {
     const el = sectionRefs.current[id];
     if (!el) return;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 150, behavior: 'smooth' });
+    // Clear the sticky header, which is taller once the tab bar is showing.
+    const header = document.querySelector<HTMLElement>('[data-guest-header]');
+    const offset = (header?.offsetHeight ?? 120) + 12;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
+    setVisibleCategory(id);
+    centreInRail(id);
   };
 
   return (
@@ -100,9 +120,9 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       <div className="px-4 pt-1">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <svg className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-              <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.45 4.39l3.08 3.08a1 1 0 01-1.42 1.42l-3.08-3.08A7 7 0 012 9z" clipRule="evenodd" />
-            </svg>
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400">
+              <Icon name="search" className="h-[18px] w-[18px]" />
+            </span>
             <input
               type="search"
               className="input pl-10"
@@ -123,9 +143,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
                 : 'bg-white text-ink-500 ring-1 ring-ink-200'
             }`}
           >
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-              <path d="M3 5.5A1.5 1.5 0 014.5 4h11a1.5 1.5 0 010 3h-11A1.5 1.5 0 013 5.5zM5 10a1.5 1.5 0 011.5-1.5h7a1.5 1.5 0 010 3h-7A1.5 1.5 0 015 10zm3 4.5A1.5 1.5 0 019.5 13h1a1.5 1.5 0 010 3h-1A1.5 1.5 0 018 14.5z" />
-            </svg>
+            <Icon name="sliders" className="h-[18px] w-[18px]" />
           </button>
         </div>
       </div>
@@ -140,8 +158,12 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
             key={c.id}
             type="button"
             data-cat={c.id}
-            onClick={() => { activeCategory === 'ALL' ? jumpTo(c.id) : setActiveCategory(c.id); }}
-            className={activeCategory === c.id ? 'pill-on' : 'pill-off'}
+            onClick={() => (activeCategory === c.id ? setActiveCategory('ALL') : jumpTo(c.id))}
+            className={
+              activeCategory === c.id || (activeCategory === 'ALL' && visibleCategory === c.id)
+                ? 'pill-on'
+                : 'pill-off'
+            }
           >
             {c.name}
           </button>
@@ -162,8 +184,9 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
               key={d.key}
               type="button"
               onClick={() => setDiet(diet === d.key ? null : d.key)}
-              className={diet === d.key ? 'pill-on' : 'pill-off'}
+              className={`${diet === d.key ? 'pill-on' : 'pill-off'} inline-flex items-center gap-1.5`}
             >
+              <span className={`h-2 w-2 rounded-full ${d.dot}`} />
               {d.label}
             </button>
           ))}
@@ -174,7 +197,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
       {!filtering && picks.length > 0 && (
         <section className="mt-5" aria-label="Popular right now">
           <div className="flex items-baseline justify-between px-4">
-            <h2 className="text-lg font-extrabold tracking-tight text-ink-900">Popular right now</h2>
+            <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Popular right now</h2>
             <span className="text-xs font-medium text-ink-400">{picks.length} picks</span>
           </div>
 
@@ -189,16 +212,17 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
               >
                 <div className="relative aspect-[5/4] w-full">
                   <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} className="rounded-t-3xl" />
-                  <span className="absolute left-2 top-2 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                    ★ Popular
+                  <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                    <Icon name="star" className="h-2.5 w-2.5" />
+                    Popular
                   </span>
-                  <span className="absolute -bottom-3 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-lg font-bold text-white shadow-pill">
-                    +
+                  <span className="absolute -bottom-3.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white shadow-pill">
+                    <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />
                   </span>
                 </div>
-                <div className="p-2.5 pt-3.5">
-                  <p className="line-clamp-1 text-sm font-bold text-ink-900">{item.name}</p>
-                  <p className="mt-0.5 text-sm font-extrabold text-brand-600">{money(item.price, symbol)}</p>
+                <div className="p-3 pt-4">
+                  <p className="line-clamp-1 text-[13.5px] font-semibold tracking-[-0.01em] text-ink-900">{item.name}</p>
+                  <p className="mt-0.5 text-[13.5px] font-bold tabular-nums text-ink-900">{money(item.price, symbol)}</p>
                 </div>
               </button>
             ))}
@@ -216,9 +240,11 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
         )}
 
         {shaped.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-4xl" aria-hidden>🔍</p>
-            <p className="mt-3 font-bold text-ink-800">Nothing matched that</p>
+          <div className="px-4 py-14 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-100 text-ink-400">
+              <Icon name="search" className="h-6 w-6" />
+            </span>
+            <p className="mt-4 font-semibold text-ink-800">Nothing matched that</p>
             <p className="mt-1 text-sm text-ink-500">Try another dish, or clear the filters.</p>
             <button
               type="button"
@@ -237,10 +263,10 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
               aria-labelledby={`h-${category.id}`}
             >
               <div className="px-4">
-                <h2 id={`h-${category.id}`} className="text-lg font-extrabold tracking-tight text-ink-900">
+                <h2 id={`h-${category.id}`} className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">
                   {category.name}
                 </h2>
-                {category.description && <p className="mt-0.5 text-sm text-ink-500">{category.description}</p>}
+                {category.description && <p className="mt-0.5 text-[13px] text-ink-500">{category.description}</p>}
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3 px-4">

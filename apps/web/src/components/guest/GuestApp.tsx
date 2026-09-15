@@ -8,6 +8,7 @@ import { money } from '@/lib/format';
 import { useRealtime } from '@/lib/socket';
 import type { MenuItem } from '@/lib/types';
 import { Sheet, Toast, useToast } from '@/components/ui';
+import Icon from '@/components/Icon';
 import WelcomeScreen from './WelcomeScreen';
 import MenuView from './MenuView';
 import ReviewView from './ReviewView';
@@ -185,35 +186,36 @@ export default function GuestApp({ token }: { token: string }) {
   return (
     <div className="min-h-screen pb-28">
       {/* ------------------------------------------------------------ header */}
-      <header className="sticky top-0 z-30 bg-ink-50/95 backdrop-blur-lg" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+      <header data-guest-header className="sticky top-0 z-30 bg-ink-50/95 backdrop-blur-xl" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
         <div className="mx-auto max-w-2xl px-4 pb-3 pt-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-sm font-extrabold tracking-tight text-brand-600">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-xs text-white">
+            <span className="flex min-w-0 items-center gap-2 text-[13.5px] font-semibold tracking-[-0.01em] text-ink-900">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-[11px] font-bold text-white">
                 {(info?.restaurant.name ?? 'R')[0]}
               </span>
               <span className="truncate">{info?.restaurant.name}</span>
             </span>
 
             <span className="flex shrink-0 items-center gap-2">
-              <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink-700 ring-1 ring-ink-200">
-                🪑 {info?.table.label}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-700 ring-1 ring-ink-200">
+                <Icon name="table" className="h-3.5 w-3.5 text-ink-400" />
+                {info?.table.label}
               </span>
               <button
                 type="button"
                 onClick={callWaiter}
                 aria-label="Call a member of staff"
                 title="Call a member of staff"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm ring-1 ring-ink-200 transition active:scale-90"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink-500 ring-1 ring-ink-200 transition active:scale-90 hover:text-brand-600"
               >
-                🔔
+                <Icon name="bell" className="h-[17px] w-[17px]" />
               </button>
             </span>
           </div>
 
           {/* Step rail — where the guest is in the flow. */}
           <div className="mt-3 flex items-center gap-2">
-            <h1 className="display flex-1 truncate text-[22px]">{meta.title}</h1>
+            <h1 className="flex-1 truncate text-[21px] font-bold leading-tight tracking-[-0.022em] text-ink-900">{meta.title}</h1>
             <div className="flex shrink-0 gap-1" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
@@ -239,7 +241,7 @@ export default function GuestApp({ token }: { token: string }) {
                   type="button"
                   onClick={() => goTo(key)}
                   aria-current={step === key}
-                  className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition ${
+                  className={`flex-1 rounded-xl px-3 py-2 text-[12.5px] font-semibold transition ${
                     step === key ? 'bg-white text-ink-900 shadow-sm' : 'text-ink-500'
                   }`}
                 >
@@ -254,13 +256,14 @@ export default function GuestApp({ token }: { token: string }) {
       {/* ------------------------------------------------------------ banners */}
       <div className="mx-auto max-w-2xl space-y-2 px-4">
         {ordersClosed && (
-          <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+          <div className="flex items-start gap-2.5 rounded-2xl bg-amber-50 px-4 py-3 text-[13px] text-amber-900 ring-1 ring-amber-200">
+            <Icon name="info" className="mt-px h-4 w-4 shrink-0 text-amber-600" />
             The kitchen has stopped taking orders for now. Please speak to our staff.
           </div>
         )}
         {billRequested && !settled && (
-          <div className="flex items-center gap-2 rounded-2xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800 ring-1 ring-brand-200">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-brand-500" />
+          <div className="flex items-center gap-2.5 rounded-2xl bg-brand-50 px-4 py-3 text-[13px] font-semibold text-brand-800 ring-1 ring-brand-200">
+            <Icon name="receipt" className="h-4 w-4 shrink-0 text-brand-500" />
             Bill requested — a supervisor is on the way.
           </div>
         )}
@@ -334,13 +337,13 @@ export default function GuestApp({ token }: { token: string }) {
       {/* When there is a tab bar but nothing in the cart, offer the orders view. */}
       {step === 'menu' && cart.count === 0 && orders.length > 0 && (
         <div
-          className="fixed inset-x-0 bottom-0 z-20 bg-white/95 px-4 pt-3 shadow-bar backdrop-blur-lg"
+          className="fixed inset-x-0 bottom-0 z-20 border-t border-ink-100 bg-white px-4 pt-3 shadow-bar"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-ink-500">Running total</p>
-              <p className="text-lg font-extrabold leading-tight text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
+              <p className="text-[11.5px] font-medium text-ink-500">Running total</p>
+              <p className="text-[19px] font-bold leading-tight tabular-nums tracking-tight text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
             </div>
             <button type="button" onClick={() => goTo('orders')} className="btn-secondary py-3">Track orders</button>
           </div>
@@ -353,8 +356,8 @@ export default function GuestApp({ token }: { token: string }) {
       <Sheet open={billOpen} onClose={() => setBillOpen(false)} title="Ask for the bill">
         <div className="space-y-4">
           <div className="rounded-2xl bg-ink-50 p-4 text-center">
-            <p className="text-sm text-ink-500">Amount due</p>
-            <p className="text-3xl font-extrabold text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
+            <p className="text-[13px] font-medium text-ink-500">Amount due</p>
+            <p className="mt-1 text-[30px] font-bold tabular-nums tracking-tight text-ink-900">{money(live?.totals.total ?? 0, symbol)}</p>
             <p className="mt-1 text-xs text-ink-500">
               Includes {info?.restaurant.tax_label} and any charges. A supervisor will bring the final bill.
             </p>
@@ -362,8 +365,19 @@ export default function GuestApp({ token }: { token: string }) {
 
           <p className="text-sm font-semibold text-ink-700">How would you like to pay?</p>
           <div className="grid grid-cols-2 gap-2">
-            {[['UPI', '📱 UPI'], ['CARD', '💳 Card'], ['CASH', '💵 Cash'], ['OTHER', '🤝 At the table']].map(([value, label]) => (
-              <button key={value} type="button" onClick={() => requestBill(value)} className="btn-secondary py-3.5">
+            {([
+              ['UPI', 'UPI', 'phone'],
+              ['CARD', 'Card', 'card'],
+              ['CASH', 'Cash', 'cash'],
+              ['OTHER', 'At the table', 'handshake'],
+            ] as const).map(([value, label, icon]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => requestBill(value)}
+                className="btn-secondary flex-col gap-1.5 py-4"
+              >
+                <Icon name={icon} className="h-5 w-5 text-ink-400" />
                 {label}
               </button>
             ))}

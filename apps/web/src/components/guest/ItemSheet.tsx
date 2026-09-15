@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FoodTile from './FoodTile';
 import QtyStepper from './QtyStepper';
 import { money } from '@/lib/format';
+import Icon from '@/components/Icon';
 import { buildEntry, type CartEntry } from '@/lib/cart';
 import type { Addon, MenuItem, Variant } from '@/lib/types';
 
@@ -19,6 +20,20 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
   const [note, setNote] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [lastId, setLastId] = useState<string | null>(null);
+
+  // Without this the page behind the sheet scrolls under the guest's finger.
+  const open = Boolean(item);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, onClose]);
 
   // A different item means a fresh form.
   if (item && item.id !== lastId) {
@@ -62,18 +77,26 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
             aria-label="Close"
             className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink-600 shadow-sm backdrop-blur active:scale-90"
           >
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+            <Icon name="close" className="h-4.5 w-4.5" strokeWidth={2} />
           </button>
-          <span className="absolute -bottom-3 left-5 h-6 w-16 rounded-t-full" />
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-4 pt-4">
-          <h2 className="text-xl font-extrabold leading-tight text-ink-900">{item.name}</h2>
-          {item.description && <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{item.description}</p>}
-          <p className="mt-2 flex items-center gap-2 text-xs text-ink-400">
-            <span>⏱ about {item.prep_minutes} min</span>
-            {item.spice_level > 0 && <span>{'🌶️'.repeat(item.spice_level)}</span>}
-          </p>
+          <h2 className="text-[21px] font-bold leading-tight tracking-[-0.02em] text-ink-900">{item.name}</h2>
+          {item.description && <p className="mt-2 text-[13.5px] leading-[1.55] text-ink-500">{item.description}</p>}
+          <div className="mt-3 flex items-center gap-3 text-[11.5px] font-medium text-ink-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Icon name="clock" className="h-3.5 w-3.5" />
+              about {item.prep_minutes} min
+            </span>
+            {item.spice_level > 0 && (
+              <span className="inline-flex items-center gap-0.5 text-brand-500">
+                {Array.from({ length: item.spice_level }).map((_, i) => (
+                  <Icon key={i} name="flame" className="h-3 w-3" />
+                ))}
+              </span>
+            )}
+          </div>
 
           {item.variants?.length > 0 && (
             <fieldset className="mt-5">
@@ -88,9 +111,9 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
                   >
                     <span className="flex items-center gap-3">
                       <input type="radio" name="variant" className="h-4 w-4 accent-brand-500" checked={variant?.id === v.id} onChange={() => setVariant(v)} />
-                      <span className="text-sm font-semibold text-ink-800">{v.name}</span>
+                      <span className="text-[13.5px] font-medium text-ink-800">{v.name}</span>
                     </span>
-                    <span className="text-sm font-bold text-ink-600">
+                    <span className="text-[13.5px] font-semibold tabular-nums text-ink-600">
                       {v.price_delta === 0 ? money(item.price, symbol) : `+${money(v.price_delta, symbol)}`}
                     </span>
                   </label>
@@ -119,9 +142,9 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
                           checked={on}
                           onChange={(e) => setAddonIds((prev) => (e.target.checked ? [...prev, a.id] : prev.filter((id) => id !== a.id)))}
                         />
-                        <span className="text-sm font-semibold text-ink-800">{a.name}</span>
+                        <span className="text-[13.5px] font-medium text-ink-800">{a.name}</span>
                       </span>
-                      <span className="text-sm font-bold text-ink-600">+{money(a.price, symbol)}</span>
+                      <span className="text-[13.5px] font-semibold tabular-nums text-ink-600">+{money(a.price, symbol)}</span>
                     </label>
                   );
                 })}

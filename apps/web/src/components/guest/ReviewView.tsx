@@ -6,6 +6,7 @@ import QtyStepper from './QtyStepper';
 import { money } from '@/lib/format';
 import type { CartEntry } from '@/lib/cart';
 import { Spinner } from '@/components/ui';
+import Icon from '@/components/Icon';
 
 /** One cart line. Swipe left (or tap the bin) to remove it. */
 function CartRow({ entry, symbol, onQuantity }: {
@@ -27,9 +28,7 @@ function CartRow({ entry, symbol, onQuantity }: {
           onClick={() => onQuantity(entry.key, 0)}
           className="flex flex-col items-center gap-1 text-[11px] font-bold active:scale-90"
         >
-          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-            <path fillRule="evenodd" d="M8.75 1a1 1 0 00-.98.8L7.57 3H4a1 1 0 000 2h12a1 1 0 100-2h-3.57l-.2-1.2a1 1 0 00-.98-.8h-2.5zM5.06 7a1 1 0 011-.94h7.88a1 1 0 011 .94l-.6 9.06A2 2 0 0113.35 18H6.65a2 2 0 01-2-1.94L5.06 7z" clipRule="evenodd" />
-          </svg>
+          <Icon name="trash" className="h-5 w-5" />
           Remove
         </button>
       </div>
@@ -50,7 +49,7 @@ function CartRow({ entry, symbol, onQuantity }: {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold text-ink-900">{entry.name}</p>
+          <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-ink-900">{entry.name}</p>
 
           {options.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
@@ -64,7 +63,7 @@ function CartRow({ entry, symbol, onQuantity }: {
 
           {entry.note && <p className="mt-1 truncate text-[11px] italic text-brand-600">“{entry.note}”</p>}
 
-          <p className="mt-1 text-sm font-extrabold text-ink-900">{money(entry.unitPrice * entry.quantity, symbol)}</p>
+          <p className="mt-1.5 text-[14px] font-bold tabular-nums text-ink-900">{money(entry.unitPrice * entry.quantity, symbol)}</p>
         </div>
 
         <QtyStepper value={entry.quantity} onChange={(n) => onQuantity(entry.key, n)} min={0} max={30} />
@@ -106,8 +105,10 @@ export default function ReviewView({
   if (entries.length === 0) {
     return (
       <div className="px-4 py-16 text-center">
-        <p className="text-5xl" aria-hidden>🛒</p>
-        <p className="mt-4 text-lg font-bold text-ink-800">Your tray is empty</p>
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-ink-100 text-ink-400">
+          <Icon name="tray" className="h-7 w-7" />
+        </span>
+        <p className="mt-4 text-[17px] font-semibold text-ink-800">Your tray is empty</p>
         <p className="mt-1 text-sm text-ink-500">Add a few things from the menu and they will show up here.</p>
         <button type="button" onClick={onAddMore} className="btn-primary mt-6">Browse the menu</button>
       </div>
@@ -145,9 +146,7 @@ export default function ReviewView({
               className="flex items-center gap-1.5 text-sm font-bold text-ink-900 active:opacity-60"
             >
               {guestName || <span className="font-medium text-ink-400">Add your name</span>}
-              <svg className="h-3.5 w-3.5 text-brand-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                <path d="M13.6 2.4a2 2 0 012.8 2.8l-.8.8-2.8-2.8.8-.8zM11.4 4.6l2.8 2.8-7.4 7.4a1 1 0 01-.5.3l-3 .8a.5.5 0 01-.6-.6l.8-3a1 1 0 01.3-.5l7.6-7.2z" />
-              </svg>
+              <Icon name="pencil" className="h-3.5 w-3.5 text-brand-500" />
             </button>
           )}
         </div>
@@ -156,7 +155,7 @@ export default function ReviewView({
       {/* ---------------------------------------------------- order lines */}
       <section aria-label="Your order">
         <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-lg font-extrabold tracking-tight text-ink-900">Your order</h2>
+          <h2 className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">Your order</h2>
           <span className="text-xs font-medium text-ink-400">{count} {count === 1 ? 'item' : 'items'}</span>
         </div>
 
@@ -169,9 +168,10 @@ export default function ReviewView({
         <button
           type="button"
           onClick={onAddMore}
-          className="mt-3 w-full rounded-2xl border-2 border-dashed border-ink-200 py-3 text-sm font-bold text-brand-600 active:scale-[0.99]"
+          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-ink-300 py-3.5 text-[13.5px] font-semibold text-brand-600 transition active:scale-[0.99]"
         >
-          + Add more items
+          <Icon name="plus" className="h-4 w-4" strokeWidth={2.2} />
+          Add more items
         </button>
       </section>
 
@@ -190,7 +190,7 @@ export default function ReviewView({
 
       {/* ------------------------------------------------------- details */}
       <section className="card p-4" aria-label="Bill details">
-        <h2 className="text-sm font-extrabold text-ink-900">Details</h2>
+        <h2 className="text-[13.5px] font-semibold tracking-[-0.01em] text-ink-900">Bill details</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt className="text-ink-500">Total items</dt>
@@ -211,18 +211,18 @@ export default function ReviewView({
             <dd className="font-semibold text-ink-800">{money(tax, symbol)}</dd>
           </div>
           <div className="flex justify-between border-t border-dashed border-ink-200 pt-2.5">
-            <dt className="text-base font-extrabold text-ink-900">This round</dt>
-            <dd className="text-base font-extrabold text-ink-900">{money(estimate, symbol)}</dd>
+            <dt className="text-[15px] font-semibold text-ink-900">This order</dt>
+            <dd className="text-[19px] font-bold tabular-nums tracking-tight text-ink-900">{money(estimate, symbol)}</dd>
           </div>
         </dl>
         <p className="mt-2.5 text-[11px] leading-relaxed text-ink-400">
-          An estimate for what you&apos;re adding now. Your final bill covers every round at this table.
+          An estimate for what you&apos;re adding now. Your final bill covers everything ordered at this table.
         </p>
       </section>
 
       {/* -------------------------------------------------------- confirm */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 bg-white/95 px-4 pt-3 shadow-bar backdrop-blur-lg"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-100 bg-white px-4 pt-3 shadow-bar"
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       >
         <div className="mx-auto max-w-2xl">

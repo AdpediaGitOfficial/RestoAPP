@@ -1,6 +1,7 @@
 'use client';
 
 import FoodTile from './FoodTile';
+import Icon from '@/components/Icon';
 import { money } from '@/lib/format';
 import type { MenuItem } from '@/lib/types';
 
@@ -26,7 +27,9 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
   index?: number;
 }) {
   const soldOut = !item.is_available;
-  const hasOptions = item.variants?.length > 0 || item.addons?.length > 0;
+  // The "onwards" price already signals sizes, so only mention add-ons when
+  // they are the only choice on offer.
+  const showOptionHint = !item.variants?.length && item.addons?.length > 0;
 
   return (
     <button
@@ -43,42 +46,63 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
         <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} className="rounded-t-3xl" />
 
         {item.is_recommended && !soldOut && (
-          <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-brand-600 shadow-sm backdrop-blur">
-            ★ Popular
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-600 shadow-sm backdrop-blur">
+            <Icon name="star" className="h-2.5 w-2.5" />
+            Popular
           </span>
         )}
 
         {soldOut && (
-          <span className="absolute inset-0 flex items-center justify-center rounded-t-3xl bg-white/70 text-xs font-bold uppercase tracking-wider text-ink-600 backdrop-blur-[1px]">
-            Sold out today
+          <span className="absolute inset-0 flex items-center justify-center rounded-t-3xl bg-white/75 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-600 backdrop-blur-[2px]">
+            Sold out
           </span>
         )}
 
         {!soldOut && (
           <span
-            className={`absolute -bottom-3 right-2 flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 text-lg font-bold shadow-pill transition-transform group-active:scale-90 ${
-              inCart > 0 ? 'bg-white text-brand-600 ring-2 ring-brand-500' : 'bg-brand-500 text-white'
+            className={`absolute -bottom-3.5 right-2.5 flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 shadow-pill transition-transform group-active:scale-90 ${
+              inCart > 0 ? 'bg-white text-brand-600 ring-[1.5px] ring-brand-500' : 'bg-brand-500 text-white'
             }`}
           >
-            {inCart > 0 ? <span className="text-sm font-extrabold">{inCart}</span> : '+'}
+            {inCart > 0
+              ? <span className="text-sm font-bold tabular-nums">{inCart}</span>
+              : <Icon name="plus" className="h-4 w-4" strokeWidth={2.4} />}
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 p-3 pt-4">
+      <div className="flex flex-1 flex-col p-3.5 pt-4">
         <div className="flex items-start gap-1.5">
-          <span className="mt-0.5"><VegMark type={item.food_type} /></span>
-          <h3 className="line-clamp-2 flex-1 text-[15px] font-bold leading-snug text-ink-900">{item.name}</h3>
+          <span className="mt-[3px]"><VegMark type={item.food_type} /></span>
+          <h3 className="line-clamp-2 flex-1 text-[14.5px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink-900">
+            {item.name}
+          </h3>
         </div>
 
         {item.description && (
-          <p className="line-clamp-2 text-xs leading-relaxed text-ink-500">{item.description}</p>
+          <p className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-ink-500">{item.description}</p>
         )}
 
-        <div className="mt-auto flex items-center gap-2 pt-1.5">
-          <span className="text-[15px] font-extrabold text-brand-600">{money(item.price, symbol)}</span>
-          {hasOptions && <span className="text-[10px] font-medium text-ink-400">customisable</span>}
-          {item.spice_level > 0 && <span className="text-[10px]">{'🌶️'.repeat(item.spice_level)}</span>}
+        {/* Metadata sits above the price so every card's price shares a
+            baseline, however much copy the dish above it has. */}
+        {(showOptionHint || item.spice_level > 0) && (
+          <div className="mt-1.5 flex items-center gap-2 text-[10.5px] font-medium text-ink-400">
+            {showOptionHint && <span>Choose extras</span>}
+            {item.spice_level > 0 && (
+              <span className="inline-flex items-center gap-0.5 text-brand-500">
+                {Array.from({ length: item.spice_level }).map((_, i) => (
+                  <Icon key={i} name="flame" className="h-2.5 w-2.5" />
+                ))}
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-auto flex items-baseline gap-1.5 pt-2.5">
+          <span className="text-[15px] font-bold tabular-nums tracking-tight text-ink-900">
+            {money(item.price, symbol)}
+          </span>
+          {item.variants?.length > 0 && <span className="text-[11px] text-ink-400">onwards</span>}
         </div>
       </div>
     </button>

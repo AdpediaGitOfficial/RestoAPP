@@ -6,20 +6,48 @@
 
 html, body { height: 100%; }
 
+html {
+  /* Anchor jumps land below the sticky header instead of behind it. */
+  scroll-padding-top: 9rem;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   @apply bg-ink-50 text-ink-900 antialiased;
   padding-top: env(safe-area-inset-top, 0px);
   -webkit-tap-highlight-color: transparent;
+  /* Stop the page rubber-banding into the browser chrome on iOS. */
+  overscroll-behavior-y: none;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Horizontal rails (categories, deals) scroll without a visible bar. */
+/* Prices and quantities must not jitter as they change. */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Keyboard users get a visible ring; pointer users do not. */
+:focus-visible {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* Horizontal rails (categories, deals) scroll without a visible bar, and
+   must never chain their scroll to the page — that is what makes a rail
+   feel like it is fighting the user. */
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold
-           transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-semibold
+           tracking-[-0.005em] transition-all duration-150 active:scale-[0.97]
+           disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary { @apply btn bg-brand-500 text-white shadow-pill hover:bg-brand-600; }
   .btn-secondary { @apply btn bg-white text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50; }
@@ -27,7 +55,9 @@ body {
   .btn-danger { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
   .btn-sm { @apply rounded-xl px-3.5 py-2 text-xs; }
 
-  .card { @apply rounded-3xl bg-white shadow-card; }
+  /* A hairline plus a soft shadow reads as precision; a heavy shadow alone
+     reads as a template. */
+  .card { @apply rounded-3xl bg-white shadow-card ring-1 ring-ink-900/[0.04]; }
   .card-flat { @apply rounded-2xl bg-white ring-1 ring-ink-100; }
 
   .input {
@@ -38,16 +68,16 @@ body {
 
   /* Filter / category pills — the rail that runs under the search field. */
   .pill {
-    @apply shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all
+    @apply shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-medium transition-all
            duration-150 active:scale-95;
   }
   .pill-on { @apply pill bg-brand-500 text-white shadow-pill; }
-  .pill-off { @apply pill bg-white text-ink-500 ring-1 ring-ink-200; }
+  .pill-off { @apply pill bg-white text-ink-600 ring-1 ring-ink-200; }
 
   .chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1; }
 
   /* Display headings: the oversized, friendly voice of the guest screens. */
-  .display { @apply text-[27px] font-extrabold leading-[1.15] tracking-[-0.02em] text-ink-900; }
+  .display { @apply text-[27px] font-bold leading-[1.12] tracking-[-0.025em] text-ink-900; }
 
   .table-head { @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-ink-500; }
   .table-cell { @apply px-4 py-3 text-sm text-ink-700; }
