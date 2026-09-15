@@ -10,7 +10,8 @@
     "migrate": "node src/db/migrate.js",
     "seed": "node src/db/seed.js",
     "reset": "node src/db/migrate.js --reset && node src/db/seed.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

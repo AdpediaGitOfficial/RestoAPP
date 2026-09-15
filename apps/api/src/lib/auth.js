@@ -44,12 +44,16 @@ export const requireRole = (...roles) => (req, _res, next) => {
   return next(forbidden(`This action needs one of: ${roles.join(', ')}`));
 };
 
-export const setAuthCookie = (res, token) =>
-  res.cookie(config.jwt.cookieName, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: config.isProd,
-    maxAge: 12 * 60 * 60 * 1000,
-  });
+const cookieOptions = () => ({
+  httpOnly: true,
+  sameSite: config.cookie.sameSite,
+  // SameSite=None is only honoured on a secure cookie.
+  secure: config.isProd || config.cookie.sameSite === 'none',
+  domain: config.cookie.domain,
+  path: '/',
+});
 
-export const clearAuthCookie = (res) => res.clearCookie(config.jwt.cookieName);
+export const setAuthCookie = (res, token) =>
+  res.cookie(config.jwt.cookieName, token, { ...cookieOptions(), maxAge: 12 * 60 * 60 * 1000 });
+
+export const clearAuthCookie = (res) => res.clearCookie(config.jwt.cookieName, cookieOptions());

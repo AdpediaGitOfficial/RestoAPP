@@ -37,6 +37,11 @@ export function errorHandler(err, _req, res, _next) {
   if (err?.code === '23503') {
     return res.status(409).json({ error: { code: 'IN_USE', message: 'That record is referenced by other data and cannot be removed' } });
   }
+  // Errors that carry their own status (e.g. the CORS gate) are operator
+  // problems, not bugs — surface the message rather than swallowing it.
+  if (err?.status && err?.code) {
+    return res.status(err.status).json({ error: { code: err.code, message: err.message } });
+  }
   console.error('[api] unhandled error:', err);
   return res.status(500).json({ error: { code: 'INTERNAL', message: 'Something went wrong on our side' } });
 }

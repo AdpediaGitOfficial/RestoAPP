@@ -151,7 +151,9 @@ apps/
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model, the ordering
-and billing flows, and the decisions behind them.
+and billing flows, and the decisions behind them, and
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for running it behind nginx and
+Cloudflare — including the build-time API URL that catches everyone out.
 
 ---
 
@@ -165,6 +167,7 @@ and billing flows, and the decisions behind them.
 | `npm run db:seed` | Load the demo cafe |
 | `npm run db:reset` | Drop everything, migrate, reseed |
 | `npm test` | API unit tests |
+| `npm run doctor` | Check config, database, accounts and a live API URL |
 
 ---
 

@@ -13,6 +13,13 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '12h',
     cookieName: 'resto_token',
   },
+  cookie: {
+    // Subdomains of one site (app.example.com + api.example.com) are
+    // same-site, so 'lax' works. Only set 'none' when the API and the web
+    // app are on genuinely different sites — and it then requires HTTPS.
+    sameSite: process.env.COOKIE_SAMESITE || 'lax',
+    domain: process.env.COOKIE_DOMAIN || undefined,
+  },
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3000')
     .split(',')
     .map((s) => s.trim())
@@ -33,4 +40,44 @@ export const config = {
 
 if (config.isProd && config.jwt.secret === 'dev-only-insecure-secret') {
   throw new Error('JWT_SECRET must be set in production');
+}
+
+if (config.cookie.sameSite === 'none' && !config.isProd) {
+  console.warn('[config] COOKIE_SAMESITE=none requires HTTPS; browsers will reject the cookie over http');
+}
+
+/**
+ * Problems that do not stop the server booting but will break the app in
+ * ways that are hard to see from a log line. Printed at startup.
+ */
+export function configWarnings() {
+  const warnings = [];
+
+  if (!process.env.NODE_ENV) {
+    warnings.push('NODE_ENV is not set, so the API is running in development mode. Set NODE_ENV=production when deploying.');
+  }
+  if (config.jwt.secret === 'dev-only-insecure-secret') {
+    warnings.push('JWT_SECRET is the built-in development value. Anyone who knows it can mint a valid admin token — set your own.');
+  }
+  if (config.corsOrigins.some((o) => o.includes('localhost')) && config.isProd) {
+    warnings.push(`CORS_ORIGINS still contains a localhost entry: ${config.corsOrigins.join(', ')}`);
+  }
+  if (config.publicWebUrl.includes('localhost')) {
+    warnings.push(`PUBLIC_WEB_URL is ${config.publicWebUrl}. QR codes embed this URL, so printed codes will not work off this machine.`);
+  }
+  return warnings;
+}
+
+/** One-line summary of the settings that decide whether the app can talk to itself. */
+export function configSummary() {
+  return {
+    env: config.env,
+    port: config.port,
+    database: config.databaseUrl.replace(/\/\/([^:]+):[^@]*@/, '//$1:****@'),
+    corsOrigins: config.corsOrigins,
+    publicWebUrl: config.publicWebUrl,
+    cookieSameSite: config.cookie.sameSite,
+    cookieSecure: config.isProd,
+    printerDriver: config.printer.driver,
+  };
 }
