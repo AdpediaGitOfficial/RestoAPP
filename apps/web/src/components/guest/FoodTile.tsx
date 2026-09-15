@@ -1,6 +1,7 @@
 'use client';
 
 import { foodArt, GLYPH_PATHS } from '@/lib/foodArt';
+import { resolveImage, resolveThumb } from '@/lib/images';
 
 /**
  * The visual for a menu item: the restaurant's photo when there is one,
@@ -14,10 +15,19 @@ export default function FoodTile({ name, foodType, imageUrl, className = '', siz
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }) {
-  if (imageUrl) {
+  // A 1000px hero behind a 90px cart thumbnail would undo the work done to
+  // make the menu load quickly, so each size takes the rendition it needs.
+  const src = size === 'lg' ? resolveImage(imageUrl) : resolveThumb(imageUrl);
+  if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={imageUrl} alt="" loading="lazy" className={`h-full w-full object-cover ${className}`} />
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className={`h-full w-full object-cover ${className}`}
+      />
     );
   }
 

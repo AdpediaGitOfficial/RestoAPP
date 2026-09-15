@@ -37,6 +37,15 @@ export function errorHandler(err, _req, res, _next) {
   if (err?.code === '23503') {
     return res.status(409).json({ error: { code: 'IN_USE', message: 'That record is referenced by other data and cannot be removed' } });
   }
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      error: { code: 'FILE_TOO_LARGE', message: 'That photo is too large. Please use one under 8MB.' },
+    });
+  }
+  if (err?.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ error: { code: 'BAD_UPLOAD', message: 'Upload one photo at a time.' } });
+  }
+
   // Errors that carry their own status (e.g. the CORS gate) are operator
   // problems, not bugs — surface the message rather than swallowing it.
   if (err?.status && err?.code) {

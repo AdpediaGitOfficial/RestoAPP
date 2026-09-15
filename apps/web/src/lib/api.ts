@@ -228,6 +228,28 @@ export const adminApi = {
   tableQr: (id: string) => get<{ table: TableBoardRow; url: string; qr: string }>(`/api/admin/tables/${id}/qr`),
   allQr: () => get<{ tables: { id: string; code: string; label: string; zone: string; url: string; qr: string }[] }>('/api/admin/tables/qr/all'),
 
+  /** Multipart upload — the browser sets its own boundary header. */
+  uploadImage: async (file: File) => {
+    const body = new FormData();
+    body.append('image', file);
+    const res = await fetch(`${apiUrl()}/api/admin/uploads`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: getToken() ? { authorization: `Bearer ${getToken()}` } : {},
+      body,
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = payload?.error || {};
+      throw new ApiError(res.status, err.code || 'UPLOAD_FAILED', err.message || 'Upload failed');
+    }
+    return payload as {
+      image: { url: string; thumbUrl: string; width: number; originalBytes: number; storedBytes: number };
+    };
+  },
+  deleteImage: (url: string) =>
+    request<{ removed: boolean }>('/api/admin/uploads', { method: 'DELETE', body: JSON.stringify({ url }) }),
+
   settings: () => get<{ settings: Settings }>('/api/admin/settings'),
   updateSettings: (body: Partial<Settings>) => patch<{ settings: Settings }>('/api/admin/settings', body),
 

@@ -37,7 +37,9 @@ table; there is nothing to install and nothing to sign into.
 ### Admins
 - **Daily metrics**: revenue, covers, average bill, hourly split, best sellers,
   category mix, payment mix, takings per staff member and a 14-day trend
-- **Menu**: categories, items, sizes, add-ons, kitchen station, one-tap "sold out"
+- **Menu**: categories, items, sizes, add-ons, kitchen station, one-tap "sold out",
+  and photos uploaded straight from a phone or laptop — resized, compressed
+  and stripped of EXIF automatically
 - **Tables**: create a run of tables at once, print QR table tents, rotate a
   compromised code
 - **Staff**: accounts and roles

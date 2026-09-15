@@ -109,6 +109,12 @@ CORS_ORIGINS=https://resto.your-domain.com
 PUBLIC_WEB_URL=https://resto.your-domain.com
 
 PRINTER_DRIVER=none
+
+# Where menu photos are written. Put this OUTSIDE the working tree so a
+# deploy, a rebuild or a stray `git clean` cannot wipe the restaurant's
+# photos — and include it in your backups.
+UPLOAD_DIR=/var/lib/restoapp/uploads
+UPLOAD_MAX_BYTES=8388608
 ```
 
 ### Web (`apps/web` process environment)
@@ -138,6 +144,47 @@ The web client also sends a bearer token from `localStorage`, so sign-in works
 either way — but the cookie is the more robust path.
 
 ---
+
+## Menu photos
+
+Photos are uploaded through **Admin → Menu → edit an item → Photo**, straight
+from the phone or laptop doing the editing. The API re-encodes every upload:
+
+- Two WebP renditions are written — 1000px for the item sheet, 400px for the
+  grid — so a 4MB phone photo lands as roughly 80KB and the menu stays fast.
+- EXIF is stripped. Phone photos carry GPS coordinates, and those would
+  otherwise be served to every guest who opens the menu.
+- The stored bytes come out of our own encoder, so a file that merely claims
+  to be an image, or a real image with something appended to it, cannot
+  survive the round trip.
+
+Only admins can upload. Files are named randomly, never from the uploaded
+filename.
+
+**Set `UPLOAD_DIR` to a path outside the repository** and back it up — these
+files are not in git and not in the database.
+
+```bash
+sudo mkdir -p /var/lib/restoapp/uploads
+sudo chown -R "$(whoami)" /var/lib/restoapp/uploads
+```
+
+Serving them through Node works, but nginx does it better — add this to the
+API server block, above `location /`:
+
+```nginx
+location /uploads/ {
+    alias /var/lib/restoapp/uploads/;
+    access_log off;
+    expires 365d;
+    add_header Cache-Control "public, immutable";
+    add_header Cross-Origin-Resource-Policy "cross-origin";
+    try_files $uri =404;
+}
+```
+
+Filenames are random and content never changes, so caching them permanently
+is safe: replacing a photo produces a new filename.
 
 ## nginx
 

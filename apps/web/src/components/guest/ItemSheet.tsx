@@ -70,7 +70,7 @@ export default function ItemSheet({ item, symbol, onClose, onAdd }: {
       >
         {/* Hero, with the close control floating over it. */}
         <div className="relative h-40 w-full shrink-0">
-          <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} size="lg" />
+          <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} size="lg" className="object-cover" />
           <button
             type="button"
             onClick={onClose}

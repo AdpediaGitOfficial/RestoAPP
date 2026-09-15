@@ -1,4 +1,10 @@
 import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Anchored to the package, so the upload directory does not move when the
+// process is started from a different working directory.
+const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const bool = (v, d = false) => (v === undefined ? d : /^(1|true|yes|on)$/i.test(String(v)));
 const int = (v, d) => (v === undefined || v === '' ? d : Number.parseInt(v, 10));
@@ -31,6 +37,14 @@ export const config = {
     port: int(process.env.PRINTER_PORT, 9100),
     charsPerLine: int(process.env.PRINTER_CHARS_PER_LINE, 42),
     cutPaper: bool(process.env.PRINTER_CUT_PAPER, true),
+  },
+  uploads: {
+    // Keep this outside the working tree in production so a deploy cannot
+    // wipe the restaurant's photos.
+    dir: process.env.UPLOAD_DIR
+      ? path.resolve(process.env.UPLOAD_DIR)
+      : path.join(apiRoot, 'uploads'),
+    maxBytes: int(process.env.UPLOAD_MAX_BYTES, 8 * 1024 * 1024),
   },
   seed: {
     adminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@restoapp.local',

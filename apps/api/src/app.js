@@ -1,4 +1,5 @@
 import express from 'express';
+import { UPLOAD_ROUTE, uploadDir, ensureUploadDir } from './services/uploads.js';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -78,6 +79,17 @@ export function createApp() {
   });
   app.get('/', index);
   app.get('/api', index);
+
+  // Menu photos. Filenames are random and content is immutable, so these can
+  // be cached hard — a changed photo gets a new filename.
+  ensureUploadDir().catch((err) => console.error('[api] cannot create upload dir:', err.message));
+  app.use(UPLOAD_ROUTE, express.static(uploadDir(), {
+    immutable: true,
+    maxAge: '365d',
+    index: false,
+    dotfiles: 'ignore',
+    setHeaders: (res) => res.set('Cross-Origin-Resource-Policy', 'cross-origin'),
+  }));
 
   app.get('/health', async (_req, res) => {
     try {

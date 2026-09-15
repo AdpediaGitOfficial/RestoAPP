@@ -7,6 +7,8 @@ import { adminApi } from '@/lib/api';
 import { money, FOOD_TYPE_LABEL } from '@/lib/format';
 import type { Category, MenuItem } from '@/lib/types';
 import { EmptyState, FoodTypeMark, LoadingScreen, Sheet, Spinner, Toast, useToast } from '@/components/ui';
+import ImagePicker from '@/components/admin/ImagePicker';
+import FoodTile from '@/components/guest/FoodTile';
 
 interface DraftRow { name: string; value: string }
 
@@ -42,6 +44,8 @@ function MenuManager() {
 
   const categories = catData?.categories ?? [];
   const items = itemData?.items ?? [];
+
+  const missingPhotos = items.filter((i) => !i.image_url).length;
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -194,7 +198,15 @@ function MenuManager() {
       <div className="flex flex-wrap items-center gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Menu</h2>
-          <p className="text-sm text-slate-500">{items.length} items across {categories.length} categories</p>
+          <p className="text-sm text-slate-500">
+            {items.length} items across {categories.length} categories
+            {missingPhotos > 0 && (
+              <>
+                {' · '}
+                <span className="font-semibold text-brand-600">{missingPhotos} without a photo</span>
+              </>
+            )}
+          </p>
         </div>
         <div className="ml-auto flex gap-2">
           <button type="button" onClick={() => setCategoryOpen(true)} className="btn-secondary">Categories</button>
@@ -248,7 +260,10 @@ function MenuManager() {
               {visible.map((item) => (
                 <tr key={item.id} className={item.is_active === false ? 'opacity-50' : ''}>
                   <td className="table-cell">
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-3">
+                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg">
+                        <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} size="sm" />
+                      </div>
                       <FoodTypeMark type={item.food_type} />
                       <div className="min-w-0">
                         <p className="font-medium text-slate-900">
@@ -358,10 +373,11 @@ function MenuManager() {
               </div>
             </div>
 
-            <div>
-              <label className="label" htmlFor="i-image">Image URL (optional)</label>
-              <input id="i-image" className="input" value={draft.image_url} onChange={(e) => setDraft({ ...draft, image_url: e.target.value })} placeholder="https://…" />
-            </div>
+            <ImagePicker
+              value={draft.image_url || null}
+              onChange={(url) => setDraft({ ...draft, image_url: url ?? '' })}
+              onError={(msg) => toast.show(msg, 'error')}
+            />
 
             <div className="flex gap-4">
               <label className="flex items-center gap-2 text-sm text-slate-700">

@@ -1,20 +1,34 @@
 /** Restaurant admin: menu, tables & QR codes, settings. */
 import { Router } from 'express';
 import crypto from 'node:crypto';
+import multer from 'multer';
 import QRCode from 'qrcode';
 import { config } from '../config.js';
 import { query, withTransaction } from '../db/index.js';
 import { requireAuth, requireRole } from '../lib/auth.js';
-import { asyncHandler, conflict, notFound } from '../lib/errors.js';
+import { asyncHandler, badRequest, conflict, notFound } from '../lib/errors.js';
 import { validate, z } from '../lib/validate.js';
 import { dailyMetrics, revenueTrend } from '../services/metrics.js';
 import { getSettings, updateSettings } from '../services/settings.js';
 import { emitStaff } from '../realtime/io.js';
+import { processAndStore, removeUpload, isLocalUpload } from '../services/uploads.js';
 
 export const adminRoutes = Router();
 adminRoutes.use(requireAuth, requireRole('ADMIN'));
 
 const qrToken = () => crypto.randomBytes(12).toString('base64url');
+
+// Files are held in memory only long enough to re-encode them; nothing the
+// uploader sent is ever written to disk as-is.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: config.uploads.maxBytes, files: 1 },
+  fileFilter(_req, file, cb) {
+    // A first, cheap gate. The real check is whether sharp can decode it.
+    if (/^image\/(jpeg|png|webp|avif|gif|heic|heif)$/i.test(file.mimetype)) return cb(null, true);
+    return cb(badRequest('Please choose a photo — JPEG, PNG, WebP or HEIC.'));
+  },
+});
 const tableUrl = (token) => `${config.publicWebUrl}/t/${token}`;
 
 // ------------------------------------------------------------ categories
@@ -89,7 +103,11 @@ const menuItemBody = z.object({
   name: z.string().trim().min(1).max(120),
   description: z.string().max(500).optional(),
   price: z.number().int().min(0, 'Price cannot be negative'),
-  image_url: z.string().url().max(500).nullable().optional(),
+  // Either one of our own uploads (/uploads/…) or an external URL.
+  image_url: z.union([
+    z.string().max(300).regex(/^\/uploads\/[a-f0-9]{32}-(lg|sm)\.webp$/, 'Unrecognised upload path'),
+    z.string().max(500).url(),
+  ]).nullable().optional(),
   food_type: z.enum(['VEG', 'NON_VEG', 'EGG', 'VEGAN']).optional(),
   is_available: z.boolean().optional(),
   is_active: z.boolean().optional(),
@@ -157,6 +175,15 @@ adminRoutes.post('/menu-items', validate(menuItemBody), asyncHandler(async (req,
 
 adminRoutes.patch('/menu-items/:id', validate(menuItemBody.partial()), asyncHandler(async (req, res) => {
   const body = req.body;
+
+  // Swapping or clearing a photo orphans the old one; clean it up.
+  if (body.image_url !== undefined) {
+    const { rows } = await query('SELECT image_url FROM menu_items WHERE id = $1', [req.params.id]);
+    const previous = rows[0]?.image_url;
+    if (previous && previous !== body.image_url && isLocalUpload(previous)) {
+      await removeUpload(previous).catch(() => {});
+    }
+  }
   const item = await withTransaction(async (client) => {
     const fields = MENU_FIELDS.filter((f) => body[f] !== undefined);
     let row;
@@ -316,6 +343,19 @@ adminRoutes.get('/tables/qr/all', asyncHandler(async (_req, res) => {
   })));
   res.json({ tables });
 }));
+
+// ---------------------------------------------------------------- photos
+/** Upload a menu photo. Returns the paths to store on the item. */
+adminRoutes.post('/uploads', upload.single('image'), asyncHandler(async (req, res) => {
+  const stored = await processAndStore(req.file?.buffer, req.file?.originalname);
+  res.status(201).json({ image: stored });
+}));
+
+/** Remove a stored photo. Only ever touches files this API wrote. */
+adminRoutes.delete('/uploads', validate(z.object({ url: z.string().max(300) })),
+  asyncHandler(async (req, res) => {
+    res.json({ removed: await removeUpload(req.body.url) });
+  }));
 
 // --------------------------------------------------------------- settings
 adminRoutes.get('/settings', asyncHandler(async (_req, res) => {
