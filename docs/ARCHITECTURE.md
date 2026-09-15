@@ -149,6 +149,24 @@ produces one ticket at the bar and one at the bakery.
 Guests are anonymous by design — there is no account to breach, and the only thing
 a QR token grants is the ability to order to that table.
 
+## Making the guest app fast
+
+A guest scans a code standing at a table on a phone, so the time from scan to
+a usable menu is the number that matters. Four things protect it:
+
+- **The menu page is server-rendered.** The Next server fetches the table and
+  the menu over loopback and ships them with the HTML. Without this, nothing
+  can start until the bundle downloads and hydrates — measured at 277ms of
+  dead time before the first request even left the browser.
+- **The API is compressed.** A 205-item menu is ~133KB of JSON and ~25KB on
+  the wire.
+- **Long menus render progressively.** Only the first sections are in the
+  initial HTML; the rest render on idle from the same payload, and offscreen
+  sections skip layout and paint entirely.
+- **The menu is briefly cacheable, but never stale when it counts.** It
+  carries a 15-second public cache, and marking an item sold out pushes over
+  websockets and refetches past every cache in between.
+
 ## Decisions worth knowing
 
 **Raw SQL over an ORM.** The schema is not large, and the queries that matter —

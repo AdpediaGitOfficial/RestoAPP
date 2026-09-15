@@ -28,16 +28,28 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
   ordersPlaced: number;
 }) {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [sort, setSort] = useState<Sort>('recommended');
   const [diet, setDiet] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [visibleCategory, setVisibleCategory] = useState<string | null>(null);
+  // Server-render only what the guest can actually see. The rest arrives with
+  // the same payload and is rendered as soon as the browser is idle, so the
+  // first paint is not paying to lay out a 200-item menu nobody has scrolled
+  // to yet.
+  const [renderAll, setRenderAll] = useState(false);
 
   const railRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  const query = search.trim().toLowerCase();
+  // Filtering a 200-item menu per keystroke drops frames while typing.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 140);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const query = debouncedSearch.trim().toLowerCase();
   const filtering = Boolean(query || diet || sort !== 'recommended' || activeCategory !== 'ALL');
 
   /** Apply search, diet and sort inside each category. */
@@ -69,7 +81,21 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
     [categories],
   );
 
+  useEffect(() => {
+    const idle = (cb: () => void) => (typeof requestIdleCallback === 'function'
+      ? requestIdleCallback(cb, { timeout: 600 })
+      : window.setTimeout(cb, 120));
+    const handle = idle(() => setRenderAll(true));
+    return () => {
+      if (typeof cancelIdleCallback === 'function') cancelIdleCallback(handle as number);
+      else clearTimeout(handle as number);
+    };
+  }, []);
+
   const resultCount = shaped.reduce((n, c) => n + c.items.length, 0);
+  // Which sections are on the page — the observer only needs to rerun when
+  // this changes, not on every keystroke.
+  const sectionKey = shaped.map((c) => c.id).join(',');
 
   // Track which category the guest has scrolled into, and follow it in the rail.
   //
@@ -101,7 +127,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
     );
     Object.values(sectionRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
-  }, [shaped, activeCategory, centreInRail]);
+  }, [sectionKey, activeCategory, centreInRail]);
 
   const jumpTo = (id: string) => {
     const el = sectionRefs.current[id];
@@ -255,12 +281,15 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
             </button>
           </div>
         ) : (
-          shaped.map((category) => (
+          // While filtering, every match must be shown; on first load only the
+          // first couple of sections are needed to fill the screen.
+          (renderAll || filtering ? shaped : shaped.slice(0, 2)).map((category, index) => (
             <section
               key={category.id}
               id={`sec-${category.id}`}
               ref={(el) => { sectionRefs.current[category.id] = el; }}
               aria-labelledby={`h-${category.id}`}
+              className={index > 0 ? 'defer-paint' : undefined}
             >
               <div className="px-4">
                 <h2 id={`h-${category.id}`} className="text-[17px] font-bold tracking-[-0.015em] text-ink-900">
@@ -275,7 +304,7 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
                     key={item.id}
                     item={item}
                     symbol={symbol}
-                    index={i}
+                    index={index === 0 ? i : -1}
                     inCart={quantityOf(item.id)}
                     onOpen={() => onOpenItem(item)}
                   />
@@ -285,6 +314,14 @@ export default function MenuView({ categories, symbol, quantityOf, onOpenItem, o
           ))
         )}
       </div>
+
+      {!renderAll && !filtering && shaped.length > 2 && (
+        <div
+          aria-hidden
+          style={{ height: `${(shaped.length - 2) * 620}px` }}
+          className="px-4"
+        />
+      )}
 
       {ordersPlaced > 0 && (
         <p className="mt-8 px-4 text-center text-xs text-ink-400">

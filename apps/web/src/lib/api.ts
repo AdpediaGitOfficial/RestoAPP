@@ -109,7 +109,13 @@ export interface GuestSession {
 
 export const guestApi = {
   table: (token: string) => get<TableInfo>(`/api/public/tables/${token}`, false),
-  menu: () => get<{ categories: Category[] }>('/api/public/menu', false),
+  /**
+   * The menu carries a short public cache so the first scan is fast. When the
+   * kitchen marks something sold out we must not serve a stale copy, so the
+   * websocket-triggered refresh bypasses every cache in between.
+   */
+  menu: (fresh = false) =>
+    get<{ categories: Category[] }>(`/api/public/menu${fresh ? `?t=${Date.now()}` : ''}`, false),
   placeOrder: (body: { token: string; items: CartLine[]; note?: string; guestDevice?: string; guestCount?: number }) =>
     post<{ order: Order }>('/api/public/orders', body, false),
   session: (id: string, token: string) => get<GuestSession>(`/api/public/sessions/${id}?token=${token}`, false),

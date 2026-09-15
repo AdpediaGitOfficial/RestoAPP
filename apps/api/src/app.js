@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -15,6 +16,10 @@ export function createApp() {
   const app = express();
 
   app.set('trust proxy', 1);
+
+  // A 200-item menu is ~130KB of JSON. Over a phone connection that is most
+  // of the wait before a guest sees anything, and it compresses ~10:1.
+  app.use(compression({ threshold: 1024 }));
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({
     origin(origin, cb) {
@@ -81,6 +86,14 @@ export function createApp() {
     } catch (err) {
       res.status(503).json({ status: 'degraded', db: 'down', error: err.message });
     }
+  });
+
+  // Guests hit the menu on every scan. It is public, identical for everyone
+  // and changes rarely, so allow a short shared cache; edits are pushed to
+  // open clients over websockets regardless.
+  app.use('/api/public/menu', (_req, res, next) => {
+    res.set('Cache-Control', 'public, max-age=15, stale-while-revalidate=45');
+    next();
   });
 
   app.use('/api/auth', authRoutes);

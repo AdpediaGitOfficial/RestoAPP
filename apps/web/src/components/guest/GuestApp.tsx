@@ -25,7 +25,11 @@ const STEP_META: Record<Step, { title: string; index: number }> = {
   orders: { title: 'Your orders', index: 2 },
 };
 
-export default function GuestApp({ token }: { token: string }) {
+export default function GuestApp({ token, initialTable = null, initialMenu = null }: {
+  token: string;
+  initialTable?: TableInfo | null;
+  initialMenu?: { categories: import('@/lib/types').Category[] } | null;
+}) {
   const toast = useToast();
   const cart = useCart(token);
 
@@ -46,11 +50,20 @@ export default function GuestApp({ token }: { token: string }) {
     }
   }, [token]);
 
+  // Seeded from the server render, so there is nothing to wait for on first
+  // paint; SWR still revalidates in the background.
   const { data: info, error: infoError, isLoading: infoLoading, mutate: refreshInfo } =
-    useSWR<TableInfo>(['table', token], () => guestApi.table(token));
+    useSWR<TableInfo>(['table', token], () => guestApi.table(token), {
+      fallbackData: initialTable ?? undefined,
+      revalidateOnMount: !initialTable,
+    });
 
   const { data: menu, isLoading: menuLoading, mutate: refreshMenu } =
-    useSWR<{ categories: import('@/lib/types').Category[] }>('menu', () => guestApi.menu(), { revalidateOnFocus: false });
+    useSWR<{ categories: import('@/lib/types').Category[] }>('menu', () => guestApi.menu(), {
+      fallbackData: initialMenu ?? undefined,
+      revalidateOnMount: !initialMenu,
+      revalidateOnFocus: false,
+    });
 
   const sessionId = info?.session?.id ?? null;
 
@@ -68,7 +81,8 @@ export default function GuestApp({ token }: { token: string }) {
       'session:closed': () => { refreshSession(); refreshInfo(); cart.clear(); },
       'bill:generated': () => refreshSession(),
       'bill:settled': () => { refreshSession(); refreshInfo(); cart.clear(); },
-      'menu:changed': () => refreshMenu(),
+      // Bypass the cache: this fires when an item is 86'd or a price changes.
+      'menu:changed': () => refreshMenu(() => guestApi.menu(true), { revalidate: false }),
     },
     { sessionId },
   );

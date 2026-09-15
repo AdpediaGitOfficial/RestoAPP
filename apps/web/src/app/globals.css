@@ -82,6 +82,15 @@ body {
   .table-head { @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-ink-500; }
   .table-cell { @apply px-4 py-3 text-sm text-ink-700; }
 
+  /* A long menu is mostly offscreen. This lets the browser skip layout and
+     paint for sections the guest has not reached, which is the difference
+     between a menu that opens instantly and one that hitches on a mid-range
+     phone. The intrinsic size keeps the scrollbar honest. */
+  .defer-paint {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+  }
+
   /* Loading placeholder with a light sweep across it. */
   .skeleton { @apply relative overflow-hidden bg-ink-100; }
   .skeleton::after {

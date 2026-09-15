@@ -116,6 +116,11 @@ PRINTER_DRIVER=none
 ```bash
 # Read at runtime and served to the browser via /env.js
 API_URL=https://api.your-domain.com
+
+# Used only for server-side rendering. Keeping this on loopback means the
+# first paint does not pay for DNS, TLS and a Cloudflare hop out to the
+# public API and back — it is the single biggest win for scan-to-menu time.
+INTERNAL_API_URL=http://127.0.0.1:4000
 ```
 
 ### Cookies across domains
@@ -184,7 +189,40 @@ server {
 
 - Enable **WebSockets** (Network settings) or realtime will not connect.
 - SSL mode **Full (strict)** with an origin certificate.
-- Do not cache `/api/*` — it is all dynamic.
+- Leave **Brotli** on.
+- Do not add a cache rule for `/api/*` — the API sets its own headers. Only
+  `/api/public/menu` is marked cacheable (15s, plus 45s stale-while-revalidate);
+  everything else is per-guest or per-session and is sent uncached. Marking an
+  item sold out bypasses that cache, so guests never order something that has
+  just run out.
+
+## Performance notes
+
+Scan-to-menu was measured on a throttled mid-range phone (1.6 Mbps, 4× CPU)
+against a 205-item menu:
+
+| | Before | After |
+|---|---|---|
+| Menu payload over the wire | 133 KB | 25 KB |
+| Menu fetch | 768 ms | not fetched (server-rendered) |
+| Time until a menu item is visible | 1776 ms | 762 ms |
+
+What changed, in order of impact:
+
+1. **The page is server-rendered.** The table and menu are fetched during SSR
+   and handed to the client, so nothing waits for JavaScript to download and
+   hydrate before the first request can even start.
+2. **gzip on the API.** A big menu compresses about 5:1.
+3. **Only the first sections render up front**; the rest come in on idle from
+   the same payload, so a long menu does not delay first paint.
+4. **Offscreen sections skip layout and paint** (`content-visibility`).
+5. **Search is debounced**, so typing does not re-filter the whole menu on
+   every keystroke.
+
+If the menu still feels slow on your hardware, check in this order: is
+`INTERNAL_API_URL` set (otherwise SSR goes out through Cloudflare), is nginx
+gzipping the Next response, and does `curl -I` on the API show
+`content-encoding: gzip`.
 
 ---
 

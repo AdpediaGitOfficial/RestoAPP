@@ -37,10 +37,10 @@ export default function MenuCard({ item, symbol, inCart, onOpen, index = 0 }: {
       onClick={onOpen}
       disabled={soldOut}
       aria-label={`${item.name}, ${money(item.price, symbol)}${soldOut ? ', sold out' : ''}`}
-      className={`card group relative flex animate-rise-in flex-col text-left transition-all duration-200 ${
-        soldOut ? 'opacity-60' : 'active:scale-[0.98] hover:shadow-lift'
-      }`}
-      style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+      className={`card group relative flex flex-col text-left transition-all duration-200 ${
+        index >= 0 ? 'animate-rise-in' : ''
+      } ${soldOut ? 'opacity-60' : 'active:scale-[0.98] hover:shadow-lift'}`}
+      style={index >= 0 ? { animationDelay: `${Math.min(index, 8) * 35}ms` } : undefined}
     >
       <div className="relative aspect-[4/3] w-full">
         <FoodTile name={item.name} foodType={item.food_type} imageUrl={item.image_url} className="rounded-t-3xl" />
