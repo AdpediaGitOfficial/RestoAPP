@@ -22,10 +22,13 @@ const NAV: { href: string; label: string; icon: string; roles: Role[] }[] = [
  * Chrome for every staff screen: checks the session, shows only the
  * navigation the signed-in role may use, and handles sign-out.
  */
-export default function StaffShell({ children, requires, title }: {
+export default function StaffShell({ children, requires, title, wide = false }: {
   children: (user: StaffUser) => React.ReactNode;
   requires: Role[];
   title: string;
+  /** Let a screen use the whole display. The kitchen board is usually on a
+   *  wall-mounted panel, where boxing it to 1280px throws away columns. */
+  wide?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -98,10 +101,10 @@ export default function StaffShell({ children, requires, title }: {
   const nav = NAV.filter((n) => user.role === 'ADMIN' || n.roles.includes(user.role));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-          <Link href={nav[0]?.href ?? '/'} className="flex items-center gap-2 font-bold text-slate-900">
+          <Link href={nav[0]?.href ?? '/'} className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">R</span>
             <span className="hidden sm:inline">RestoAPP</span>
           </Link>
@@ -114,7 +117,7 @@ export default function StaffShell({ children, requires, title }: {
                   key={n.href}
                   href={n.href}
                   className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'
+                    active ? 'bg-brand-50 text-brand-700 dark:bg-slate-700 dark:text-brand-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span className="mr-1.5" aria-hidden>{n.icon}</span>{n.label}
@@ -125,8 +128,8 @@ export default function StaffShell({ children, requires, title }: {
 
           <div className="ml-auto flex items-center gap-2">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold leading-tight text-slate-900">{user.name}</p>
-              <p className="text-xs capitalize text-slate-500">{user.role.toLowerCase()}</p>
+              <p className="text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">{user.name}</p>
+              <p className="text-xs capitalize text-slate-500 dark:text-slate-400">{user.role.toLowerCase()}</p>
             </div>
             <button type="button" onClick={signOut} className="btn-ghost btn-sm">Sign out</button>
             <button
@@ -157,7 +160,7 @@ export default function StaffShell({ children, requires, title }: {
         )}
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-5">
+      <main className={`mx-auto px-4 py-5 ${wide ? 'max-w-none' : 'max-w-7xl'}`}>
         <h1 className="sr-only">{title}</h1>
         {children(user)}
       </main>
