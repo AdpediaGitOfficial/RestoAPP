@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeTotals } from '../src/services/billing.js';
+import { computeTotals, consolidateBillLines } from '../src/services/billing.js';
 import { percentOf, roundTotal, formatMoney } from '../src/lib/money.js';
 import { renderKot, renderBill, toEscPos } from '../src/services/printing.js';
 
@@ -75,6 +75,119 @@ describe('computeTotals', () => {
   });
 });
 
+describe('consolidateBillLines', () => {
+  // A table that ordered in three rounds: two cold brews an hour apart, a plain
+  // cappuccino twice, one with add-ons, and one in a larger size.
+  const row = (over) => ({
+    id: Math.random().toString(36).slice(2),
+    menu_item_id: 'm-cold', variant_id: null, item_name: 'Cold Brew', variant_name: null,
+    unit_price: 22000, quantity: 1, addons: [], addons_total: 0, line_total: 22000, note: '',
+    ...over,
+  });
+  const capp = (over) => row({
+    menu_item_id: 'm-capp', variant_id: 'v-reg', item_name: 'Cappuccino',
+    variant_name: 'Regular', unit_price: 18000, line_total: 18000, ...over,
+  });
+
+  test('repeat orders of the same thing become one line', () => {
+    const [line] = consolidateBillLines([row(), row()]);
+    assert.equal(line.quantity, 2);
+    assert.equal(line.line_total, 44000);
+    assert.equal(line.merged_from, 2);
+  });
+
+  test('quantities add up rather than being overwritten', () => {
+    const [line] = consolidateBillLines([row({ quantity: 3, line_total: 66000 }), row({ quantity: 2, line_total: 44000 })]);
+    assert.equal(line.quantity, 5);
+    assert.equal(line.line_total, 110000);
+  });
+
+  test('a different size stays on its own line', () => {
+    const lines = consolidateBillLines([
+      capp(),
+      capp({ variant_id: 'v-lg', variant_name: 'Large', unit_price: 23000, line_total: 23000 }),
+    ]);
+    assert.equal(lines.length, 2);
+    assert.deepEqual(lines.map((l) => l.variant_name), ['Regular', 'Large']);
+  });
+
+  test('add-ons keep a line separate, so the guest sees what they paid for', () => {
+    const lines = consolidateBillLines([
+      capp(),
+      capp({ addons: [{ id: 'a-shot', name: 'Extra shot' }], addons_total: 5000, line_total: 23000 }),
+    ]);
+    assert.equal(lines.length, 2);
+    assert.equal(lines[1].addons_total, 5000);
+  });
+
+  test('the same add-ons in a different order still merge', () => {
+    const both = [{ id: 'a-shot', name: 'Extra shot' }, { id: 'a-oat', name: 'Oat milk' }];
+    const lines = consolidateBillLines([
+      capp({ addons: both, addons_total: 8000, line_total: 26000 }),
+      capp({ addons: [...both].reverse(), addons_total: 8000, line_total: 26000 }),
+    ]);
+    assert.equal(lines.length, 1);
+    assert.equal(lines[0].quantity, 2);
+  });
+
+  test('a price change between rounds keeps the lines apart', () => {
+    const lines = consolidateBillLines([row(), row({ unit_price: 24000, line_total: 24000 })]);
+    assert.equal(lines.length, 2);
+  });
+
+  test('an add-on repriced between rounds keeps the lines apart', () => {
+    const lines = consolidateBillLines([
+      capp({ addons: [{ id: 'a-shot', name: 'Extra shot' }], addons_total: 5000, line_total: 23000 }),
+      capp({ addons: [{ id: 'a-shot', name: 'Extra shot' }], addons_total: 6000, line_total: 24000 }),
+    ]);
+    assert.equal(lines.length, 2);
+  });
+
+  test('a kitchen note never splits a bill line', () => {
+    const lines = consolidateBillLines([row({ note: 'extra hot' }), row({ note: '' })]);
+    assert.equal(lines.length, 1);
+    assert.equal(lines[0].quantity, 2);
+  });
+
+  test('items off a deleted menu fall back to their snapshot name', () => {
+    const lines = consolidateBillLines([
+      row({ menu_item_id: null }),
+      row({ menu_item_id: null }),
+      row({ menu_item_id: null, item_name: 'Iced Latte' }),
+    ]);
+    assert.equal(lines.length, 2);
+    assert.equal(lines[0].quantity, 2);
+  });
+
+  test('the subtotal and the total count are never changed', () => {
+    const rows = [
+      row(), row(), capp(), capp(),
+      capp({ addons: [{ id: 'a-shot', name: 'Extra shot' }], addons_total: 8000, line_total: 26000 }),
+      capp({ variant_id: 'v-lg', variant_name: 'Large', unit_price: 23000, line_total: 23000 }),
+    ];
+    const sum = (xs, k) => xs.reduce((n, x) => n + x[k], 0);
+    const lines = consolidateBillLines(rows);
+    assert.equal(lines.length, 4);
+    assert.equal(sum(lines, 'line_total'), sum(rows, 'line_total'));
+    assert.equal(sum(lines, 'quantity'), sum(rows, 'quantity'));
+  });
+
+  test('the caller\'s rows are left untouched', () => {
+    const rows = [row(), row()];
+    consolidateBillLines(rows);
+    assert.deepEqual(rows.map((r) => r.quantity), [1, 1]);
+  });
+
+  test('an empty session produces no lines', () => {
+    assert.deepEqual(consolidateBillLines([]), []);
+  });
+
+  test('the first round keeps its place in the order', () => {
+    const lines = consolidateBillLines([capp(), row(), capp()]);
+    assert.deepEqual(lines.map((l) => l.item_name), ['Cappuccino', 'Cold Brew']);
+  });
+});
+
 describe('ticket rendering', () => {
   const order = { order_number: 1001, channel: 'QR', created_at: new Date(), note: 'No sugar' };
   const items = [{
@@ -121,6 +234,23 @@ describe('ticket rendering', () => {
     assert.match(text, /TOTAL/);
     assert.match(text, /₹636\.00/);
     assert.match(text, /UPI/);
+  });
+
+  test('the printed bill shows one line with the combined count', () => {
+    const round = (n) => ({
+      menu_item_id: 'm-cold', item_name: 'Cold Brew', variant_name: null,
+      unit_price: 22000, quantity: n, addons: [], addons_total: 0, line_total: 22000 * n,
+    });
+    const lines = consolidateBillLines([round(1), round(1)]);
+    const bill = {
+      bill_number: 'B20260101-0002', subtotal: 44000, discount_amount: 0,
+      service_charge_amount: 0, tax_amount: 2200, tax_percent: 5,
+      rounding_adjustment: 0, total: 46200, created_at: new Date(),
+    };
+    const text = renderBill({ bill, items: lines, table, session, settings });
+    assert.equal(text.match(/Cold Brew/g).length, 1);
+    assert.match(text, /2 x ₹220\.00/);
+    assert.match(text, /₹440\.00/);
   });
 });
 

@@ -41,6 +41,45 @@ export function computeTotals(subtotal, settings, { discountAmount = 0 } = {}) {
   };
 }
 
+/**
+ * Collapse repeat orders of the same thing into one bill line.
+ *
+ * A guest ordering two cold brews an hour apart creates two order_items rows,
+ * because each round is its own kitchen ticket — correct for the kitchen, but
+ * a bill that lists the same drink twice is hard to check against what was
+ * actually drunk, and grows without limit over a long table.
+ *
+ * Lines merge only when the guest is paying for the identical thing: same
+ * item, same size, same add-ons and the same unit price. A cappuccino with an
+ * extra shot stays on its own line, because it costs more and the guest needs
+ * to see why. Notes are ignored — "extra hot" is an instruction to the
+ * kitchen, not a different product, and never appears on the bill.
+ */
+export function consolidateBillLines(items) {
+  const signature = (item) => [
+    item.menu_item_id ?? item.item_name,
+    item.variant_id ?? item.variant_name ?? '',
+    (item.addons ?? []).map((a) => a.id ?? a.name).sort().join('.'),
+    item.unit_price,
+    item.addons_total ?? 0,
+  ].join('|');
+
+  const merged = new Map();
+  for (const item of items) {
+    const key = signature(item);
+    const existing = merged.get(key);
+    if (existing) {
+      existing.quantity += item.quantity;
+      existing.line_total += item.line_total;
+      existing.merged_from += 1;
+    } else {
+      // Copy, so the caller's rows are not mutated.
+      merged.set(key, { ...item, merged_from: 1 });
+    }
+  }
+  return [...merged.values()];
+}
+
 async function sessionSubtotal(client, sessionId) {
   const { rows } = await client.query(
     `SELECT COALESCE(SUM(subtotal), 0)::int AS subtotal
@@ -167,7 +206,12 @@ export async function settleBill(billId, { userId, paymentMethod, paymentReferen
       [bill.session_id],
     );
 
-    return { bill: settled[0], items, session: ctx[0], table: { label: ctx[0].label } };
+    return {
+      bill: settled[0],
+      items: consolidateBillLines(items),
+      session: ctx[0],
+      table: { label: ctx[0].label },
+    };
   });
 
   await queuePrintJob({
@@ -219,7 +263,7 @@ export async function getBill(billId) {
       ORDER BY oi.created_at`,
     [bill.session_id],
   );
-  return { bill, items, settings: await getSettings() };
+  return { bill, items: consolidateBillLines(items), settings: await getSettings() };
 }
 
 export async function listBills({ from, to, status, limit = 100 } = {}) {
