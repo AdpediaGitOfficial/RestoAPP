@@ -169,6 +169,34 @@ sudo mkdir -p /var/lib/restoapp/uploads
 sudo chown -R "$(whoami)" /var/lib/restoapp/uploads
 ```
 
+### Filling the menu from a stock library
+
+To get photos on every item quickly, there is an importer that pulls from
+Pexels and runs them through the same pipeline as a manual upload:
+
+```bash
+# free key from https://www.pexels.com/api/, added to apps/api/.env
+cd apps/api
+npm run menu:photos -- --dry-run     # what each item would be searched for
+npm run menu:photos                  # fetch and assign
+```
+
+It only touches items with no photo, so it is safe to re-run and picks up
+where it stopped. Two dishes never get the same picture. For a poor match:
+
+```bash
+npm run menu:photos -- --only "Cold Brew" --query "iced coffee glass" --force
+```
+
+Every imported photo records its source, photographer and licence in
+`menu_items.image_credit`, so the right to use it can be evidenced later.
+
+**A stock photo is not a photo of your food.** For coffee and bakery that is
+harmless. For a signature dish it is not: a guest orders what they saw. Use
+this to launch, then replace the dishes that matter with your own — a phone
+photo in window light, through Admin → Menu, beats stock because it is what
+actually arrives at the table.
+
 Serving them through Node works, but nginx does it better — add this to the
 API server block, above `location /`:
 
