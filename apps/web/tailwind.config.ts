@@ -2,6 +2,10 @@ import type { Config } from 'tailwindcss';
 
 export default {
   content: ['./src/**/*.{ts,tsx}'],
+  // Dark is opt-in on the kitchen board only — it is the one screen that hangs
+  // on a wall under service lighting. Scoping it to this attribute keeps every
+  // other screen on the light palette regardless of the device's OS setting.
+  darkMode: ['selector', '[data-kds="dark"]'],
   theme: {
     extend: {
       colors: {
