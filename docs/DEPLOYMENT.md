@@ -1,4 +1,4 @@
-# Deploying RestoAPP
+# Deploying Qpab
 
 Notes for a single-server deployment behind nginx and Cloudflare, which is
 how most small restaurants will run this.
@@ -302,6 +302,23 @@ gzipping the Next response, and does `curl -I` on the API show
 ---
 
 ## pm2
+
+The process names below, the database name and the seeded `@restoapp.local`
+logins still say "resto". That is deliberate: they name things that already
+exist on a running server — pm2 processes, a database holding real orders,
+user accounts people sign in with — and renaming them means stopping
+processes, migrating a database and reissuing credentials, for no gain
+beyond tidiness. The product is Qpab; the plumbing keeps the name it was
+installed under.
+
+To rename the pm2 processes anyway, on a quiet evening:
+
+```bash
+pm2 delete resto-api resto-web
+# then start them again with the new names, and
+pm2 save
+```
+
 
 ```bash
 # API

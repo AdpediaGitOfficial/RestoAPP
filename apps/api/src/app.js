@@ -77,7 +77,7 @@ export function createApp() {
   // Hitting the base URL should tell you what this service is and how to
   // call it — a bare 404 sends people hunting for a /v1 that never existed.
   const index = (_req, res) => res.json({
-    service: 'RestoAPP API',
+    service: 'Qpab API',
     version: '1.0.0',
     note: 'There is no /v1 prefix. Every path below is complete as written.',
     routes: ROUTES,

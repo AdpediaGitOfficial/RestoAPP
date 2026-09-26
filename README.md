@@ -1,4 +1,4 @@
-# RestoAPP — QR table ordering for cafes
+# Qpab — QR table ordering for cafes
 
 Guests scan the QR code on their table, browse the menu and order. Orders print in
 the kitchen. Supervisors watch every table's running bill and settle payments.
@@ -58,7 +58,7 @@ table; there is nothing to install and nothing to sign into.
 ### 2. Install and configure
 
 ```bash
-git clone <this repo> && cd RestoAPP
+git clone <this repo> && cd <repo>
 npm install
 cp .env.example apps/api/.env
 ```

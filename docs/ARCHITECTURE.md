@@ -1,6 +1,6 @@
 # Architecture
 
-How RestoAPP is put together, and why.
+How Qpab is put together, and why.
 
 ## The shape of the system
 
