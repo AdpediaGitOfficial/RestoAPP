@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, readTokenClaims, setToken } from '@/lib/api';
 import { Spinner } from '@/components/ui';
 import Icon, { type IconName } from '@/components/Icon';
+import Logo from '@/components/Logo';
 import type { Role } from '@/lib/types';
 
 /**
@@ -84,12 +85,8 @@ function BrandPanel() {
       className="relative flex items-center overflow-hidden px-6 py-9 text-white lg:px-[6vw] lg:py-16"
     >
       <div className="relative z-10 w-full max-w-[640px]">
-        <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-500 shadow-pill">
-            <Icon name="plate" className="h-5 w-5 text-white" strokeWidth={1.8} />
-          </span>
-          <span className="text-[26px] font-bold tracking-[-0.03em]">RestoApp</span>
-        </div>
+        {/* White, because it sits over the photograph. */}
+        <Logo className="h-9 w-auto text-white sm:h-11" />
 
         {/* The story appears from tablet width up. On a phone the panel is
             just a header strip so the form starts immediately. */}
@@ -343,7 +340,7 @@ function LoginForm() {
         </form>
 
         <p className="mt-7 text-center text-[11px] text-ink-500">
-          RestoApp · Restaurant Management System
+          Qpab · Restaurant Management System
         </p>
       </div>
     </section>

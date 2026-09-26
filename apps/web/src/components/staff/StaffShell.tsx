@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ApiError, authApi, clearToken, getToken, readTokenClaims } from '@/lib/api';
 import type { Role, StaffUser } from '@/lib/types';
 import { LoadingScreen } from '@/components/ui';
+import Logo from '@/components/Logo';
 
 /**
  * The main navigation, in the order the work happens: what the day looks
@@ -136,9 +137,15 @@ export default function StaffShell({ children, requires, title, wide = false }: 
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-          <Link href={nav[0]?.href ?? '/'} className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">R</span>
-            <span className="hidden sm:inline">RestoAPP</span>
+          <Link
+            href={nav[0]?.href ?? '/'}
+            aria-label="Qpab home"
+            className="shrink-0 text-slate-900 dark:text-slate-100"
+          >
+            {/* The lockup is 3.8:1, so below sm it would have to shrink the
+                wordmark past reading size. The mark carries it there. */}
+            <Logo variant="mark" className="h-7 w-auto sm:hidden" />
+            <Logo className="hidden h-7 w-auto sm:block" />
           </Link>
 
           <nav className="no-scrollbar -mx-1 hidden flex-1 gap-1 overflow-x-auto px-1 md:flex" aria-label="Main">

@@ -1,5 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#D92B3C"/>
-  <path d="M20 16v14a6 6 0 0 0 6 6v12a2 2 0 1 0 4 0V36a6 6 0 0 0 6-6V16a2 2 0 1 0-4 0v11a2 2 0 1 1-4 0V16a2 2 0 1 0-4 0v11a2 2 0 1 1-4 0V16a2 2 0 1 0-4 0z" fill="#fff"/>
-  <path d="M44 16c-3 0-5 4-5 10s2 8 4 8v14a2 2 0 1 0 4 0V16z" fill="#fff"/>
+  <style>.cls-1{fill:#fc1216}.cls-2{fill:#fff}.cls-3{fill:#0f1014}</style>
+  <rect width="64" height="64" rx="14" fill="#fff"/>
+  <g transform="translate(10.6 10.6) scale(0.497)">
+    <g>
+          <circle class="cls-1" cx="11.91" cy="11.91" r="11.91"/>
+          <circle class="cls-1" cx="72.54" cy="72.81" r="11.91"/>
+          <circle class="cls-3" cx="11.91" cy="72.81" r="11.91"/>
+          <circle class="cls-3" cx="72.54" cy="11.91" r="11.91"/>
+          <path class="cls-3" d="M28.4,10.07h28.21c.34,0,.61.27.61.61v1.96c0,.62-.5,1.12-1.12,1.12h-28.21c-.34,0-.61-.27-.61-.61v-1.96c0-.62.5-1.12,1.12-1.12Z"/>
+          <path class="cls-3" d="M28.4,71.02h28.21c.34,0,.61.27.61.61v1.96c0,.62-.5,1.12-1.12,1.12h-28.21c-.34,0-.61-.27-.61-.61v-1.96c0-.62.5-1.12,1.12-1.12Z"/>
+          <path class="cls-3" d="M60.85,40.7h27.04c.34,0,.61.27.61.61v1.42c0,.62-.5,1.12-1.12,1.12h-27.04c-.34,0-.61-.27-.61-.61v-1.42c0-.62.5-1.12,1.12-1.12Z" transform="translate(31.84 116.39) rotate(-90)"/>
+          <path class="cls-3" d="M-1.35,40.7h27.04c.34,0,.61.27.61.61v1.42c0,.62-.5,1.12-1.12,1.12H-1.86c-.34,0-.61-.27-.61-.61v-1.42c0-.62.5-1.12,1.12-1.12Z" transform="translate(-30.36 54.18) rotate(-90)"/>
+        </g>
+        <rect class="cls-1" x="23.12" y="25.09" width="38.26" height="38.26"/>
+        <rect class="cls-2" x="32.06" y="34.03" width="20.37" height="20.37"/>
+  </g>
 </svg>
