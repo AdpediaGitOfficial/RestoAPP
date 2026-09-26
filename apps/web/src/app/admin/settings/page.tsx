@@ -26,6 +26,8 @@ function SettingsForm() {
         ...form,
         tax_percent: Number(form.tax_percent),
         service_charge_percent: Number(form.service_charge_percent),
+        auto_close_empty_minutes: Number(form.auto_close_empty_minutes),
+        auto_close_idle_minutes: Number(form.auto_close_idle_minutes),
       });
       mutate();
       toast.show('Settings saved — they apply to new bills straight away.');
@@ -115,6 +117,56 @@ function SettingsForm() {
         <div>
           <label className="label" htmlFor="c-footer">Bill footer note</label>
           <input id="c-footer" className="input" value={form.bill_footer_note} onChange={(e) => set('bill_footer_note', e.target.value)} />
+        </div>
+      </section>
+
+      <section className="card space-y-4 p-5">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900">Closing abandoned tables</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            A table nobody closed stays occupied for ever: it blocks the floor board, keeps its
+            orders on the kitchen display and counts as full in your reports. This sweeps them shut.
+            Time is measured from the table&rsquo;s last order, so a long meal is never cut short.
+          </p>
+        </div>
+
+        <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-3 text-sm">
+          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded accent-brand-600"
+                 checked={form.auto_close_enabled}
+                 onChange={(e) => set('auto_close_enabled', e.target.checked)} />
+          <span>
+            <span className="font-medium text-slate-800">Close abandoned tables automatically</span>
+            <span className="block text-xs text-slate-500">
+              Runs every 15 minutes. Anything still unpaid is recorded against the table and the
+              floor is notified, so nothing is written off silently.
+            </span>
+          </span>
+        </label>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="label" htmlFor="c-empty">Scanned but never ordered</label>
+            <div className="flex items-center gap-2">
+              <input id="c-empty" type="number" min={15} step={15} className="input"
+                     value={form.auto_close_empty_minutes}
+                     onChange={(e) => set('auto_close_empty_minutes', Number(e.target.value))} />
+              <span className="shrink-0 text-sm text-slate-500">minutes</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">Someone opened the QR and left. Nothing is owed.</p>
+          </div>
+          <div>
+            <label className="label" htmlFor="c-idle">Ordered, then went quiet</label>
+            <div className="flex items-center gap-2">
+              <input id="c-idle" type="number" min={60} step={30} className="input"
+                     value={form.auto_close_idle_minutes}
+                     onChange={(e) => set('auto_close_idle_minutes', Number(e.target.value))} />
+              <span className="shrink-0 text-sm text-slate-500">minutes</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Keep this well past your longest sitting — {Math.round(form.auto_close_idle_minutes / 60)}h
+              covers overnight without touching today.
+            </p>
+          </div>
         </div>
       </section>
 

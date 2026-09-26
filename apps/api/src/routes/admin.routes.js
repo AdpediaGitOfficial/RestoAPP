@@ -9,6 +9,7 @@ import { requireAuth, requireRole } from '../lib/auth.js';
 import { asyncHandler, badRequest, conflict, notFound } from '../lib/errors.js';
 import { validate, z } from '../lib/validate.js';
 import { dailyMetrics, revenueTrend, dashboard, overview, topItems, itemProfile } from '../services/metrics.js';
+import { findStaleSessions, sweepStaleSessions } from '../services/housekeeping.js';
 import { getSettings, updateSettings } from '../services/settings.js';
 import { emitStaff } from '../realtime/io.js';
 import { processAndStore, removeUpload, isLocalUpload } from '../services/uploads.js';
@@ -382,6 +383,24 @@ adminRoutes.patch('/settings',
     emitStaff('settings:changed', settings);
     res.json({ settings });
   }));
+
+// ----------------------------------------------------------- housekeeping
+/** What the sweep would close, without closing anything. */
+adminRoutes.get('/housekeeping/stale-sessions', asyncHandler(async (req, res) => {
+  res.json(await findStaleSessions({
+    emptyMinutes: req.query.emptyMinutes, idleMinutes: req.query.idleMinutes,
+  }));
+}));
+
+/** Run the sweep now. `force` runs it even when the setting is off. */
+adminRoutes.post('/housekeeping/close-stale', asyncHandler(async (req, res) => {
+  const result = await sweepStaleSessions({
+    emptyMinutes: req.body?.emptyMinutes,
+    idleMinutes: req.body?.idleMinutes,
+    force: req.body?.force === true,
+  });
+  res.json(result);
+}));
 
 // ---------------------------------------------------------------- metrics
 // Every one of these takes the same window: ?period=today|yesterday|7d|30d,

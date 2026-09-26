@@ -12,6 +12,7 @@ export async function updateSettings(patch) {
     'service_charge_percent', 'tax_inclusive', 'round_bill_total', 'accept_orders', 'bill_footer_note',
     // Every report buckets days and hours in this zone, not the server's.
     'timezone',
+    'auto_close_enabled', 'auto_close_empty_minutes', 'auto_close_idle_minutes',
   ];
   const keys = Object.keys(patch).filter((k) => allowed.includes(k));
   if (!keys.length) return getSettings();

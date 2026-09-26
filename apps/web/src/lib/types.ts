@@ -142,13 +142,19 @@ export interface Settings {
   service_charge_percent: number;
   tax_inclusive: boolean; round_bill_total: boolean;
   accept_orders: boolean; bill_footer_note: string;
+  /** Reports bucket days and hours in this zone, not the server's. */
+  timezone: string;
+  /** Sweeping abandoned tables shut. Minutes. */
+  auto_close_enabled: boolean;
+  auto_close_empty_minutes: number;
+  auto_close_idle_minutes: number;
 }
 
 export interface StaffUser { id: string; name: string; email: string; role: Role; is_active: boolean }
 
 export interface AppNotification {
   id: string;
-  type: 'BILL_REQUEST' | 'NEW_ORDER' | 'WAITER_CALL' | 'ORDER_CANCELLED';
+  type: 'BILL_REQUEST' | 'NEW_ORDER' | 'WAITER_CALL' | 'ORDER_CANCELLED' | 'SESSION_AUTO_CLOSED';
   table_id: string | null;
   session_id: string | null;
   order_id: string | null;

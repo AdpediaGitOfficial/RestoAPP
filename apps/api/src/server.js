@@ -3,6 +3,7 @@ import { createApp } from './app.js';
 import { config, configSummary, configWarnings } from './config.js';
 import { closePool, query } from './db/index.js';
 import { initRealtime } from './realtime/io.js';
+import { startHousekeeping } from './services/housekeeping.js';
 
 const app = createApp();
 const server = http.createServer(app);
@@ -28,6 +29,11 @@ server.listen(config.port, () => {
   // Misconfiguration here does not stop the server, but it does break login
   // and QR codes in ways that are invisible from a normal log line.
   for (const warning of configWarnings()) console.warn(`[api] WARNING: ${warning}`);
+
+  // Sweeps abandoned tables shut. The first run is one interval away, so a
+  // restart during service is never what closes a table.
+  startHousekeeping({ everyMinutes: 15 });
+  console.log('[api] housekeeping : stale-session sweep every 15m');
 });
 
 const shutdown = async (signal) => {
