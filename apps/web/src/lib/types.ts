@@ -158,6 +158,65 @@ export interface AppNotification {
   table_label?: string | null;
 }
 
+export type MetricPeriod = 'today' | 'yesterday' | '7d' | '30d' | 'custom';
+
+export interface MetricRange {
+  period: MetricPeriod;
+  tz: string;
+  from: string; to: string; end: string;
+  previous: { from: string; to: string; end: string };
+}
+
+export interface Kpi {
+  key: string;
+  label: string;
+  value: number;
+  previous: number | null;
+  /** Percent change vs the previous equivalent window; null when there is no base. */
+  change: number | null;
+  format: 'money' | 'count' | 'percent';
+  lowerIsBetter?: boolean;
+  live?: boolean;
+}
+
+export interface TopItem {
+  item_name: string;
+  menu_item_id: string | null;
+  quantity: number; revenue: number; orders: number;
+  previous_quantity: number; previous_revenue: number;
+  share_quantity: number; share_revenue: number;
+  change: number | null;
+  trend: 'up' | 'down' | 'flat' | 'new';
+}
+
+export interface ItemProfile {
+  range: MetricRange;
+  currency_symbol: string;
+  item: { key: string; item_name: string | null; quantity: number; revenue: number; orders: number };
+  /** Only the hours the restaurant traded in, labelled by the API. */
+  hourly: { hour: number; label: string; short_label: string; quantity: number; revenue: number }[];
+  weekday: { dow: number; quantity: number }[];
+  peak_hour: number | null;
+  peak_label: string | null;
+}
+
+export interface Dashboard {
+  range: MetricRange;
+  currency_symbol: string;
+  kpis: Kpi[];
+  live: {
+    open_tables: number; bill_requests: number; pending_bills: number;
+    orders_in_kitchen: number; open_table_value: number;
+  };
+  topItems: TopItem[];
+  hourly: { hour: number; label: string; short_label: string; bills: number; revenue: number; covers: number }[];
+  categories: { category: string; quantity: number; revenue: number }[];
+  payments: { method: string; bills: number; amount: number }[];
+  staff: { staff: string; bills: number; amount: number }[];
+  trend: { date: string; revenue: number; bills: number }[];
+  itemProfile: ItemProfile | null;
+}
+
 export interface DailyMetrics {
   date: string;
   summary: {

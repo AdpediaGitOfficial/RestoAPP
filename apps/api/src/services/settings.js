@@ -10,6 +10,8 @@ export async function updateSettings(patch) {
   const allowed = [
     'name', 'address', 'phone', 'currency', 'currency_symbol', 'tax_label', 'tax_percent',
     'service_charge_percent', 'tax_inclusive', 'round_bill_total', 'accept_orders', 'bill_footer_note',
+    // Every report buckets days and hours in this zone, not the server's.
+    'timezone',
   ];
   const keys = Object.keys(patch).filter((k) => allowed.includes(k));
   if (!keys.length) return getSettings();

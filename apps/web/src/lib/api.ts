@@ -3,7 +3,7 @@
  * kept in localStorage; guest calls carry the table's QR token instead.
  */
 import type {
-  Bill, Category, DailyMetrics, MenuItem, Order, Role, Settings,
+  Bill, Category, DailyMetrics, Dashboard, ItemProfile, MenuItem, Order, Role, Settings,
   StaffUser, TableBoardRow, AppNotification, Totals,
 } from './types';
 
@@ -303,5 +303,16 @@ export const adminApi = {
   updateSettings: (body: Partial<Settings>) => patch<{ settings: Settings }>('/api/admin/settings', body),
 
   dailyMetrics: (date?: string) => get<DailyMetrics>(`/api/admin/metrics/daily${date ? `?date=${date}` : ''}`),
-  trend: (days = 14) => get<{ trend: { date: string; revenue: number; bills: number }[] }>(`/api/admin/metrics/trend?days=${days}`),
+
+  /** The whole dashboard for one window, in a single request. */
+  dashboard: (q: { period: string; from?: string; to?: string; item?: string | null }) =>
+    get<Dashboard>(`/api/admin/metrics/dashboard?${new URLSearchParams(
+      Object.entries(q).filter(([, v]) => v) as [string, string][],
+    )}`),
+
+  /** When one dish sells, hour by hour. */
+  itemProfile: (key: string, q: { period: string; from?: string; to?: string }) =>
+    get<ItemProfile>(`/api/admin/metrics/items/${encodeURIComponent(key)}/profile?${new URLSearchParams(
+      Object.entries(q).filter(([, v]) => v) as [string, string][],
+    )}`),
 };

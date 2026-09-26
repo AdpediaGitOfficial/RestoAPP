@@ -8,7 +8,7 @@ import { query, withTransaction } from '../db/index.js';
 import { requireAuth, requireRole } from '../lib/auth.js';
 import { asyncHandler, badRequest, conflict, notFound } from '../lib/errors.js';
 import { validate, z } from '../lib/validate.js';
-import { dailyMetrics, revenueTrend } from '../services/metrics.js';
+import { dailyMetrics, revenueTrend, dashboard, overview, topItems, itemProfile } from '../services/metrics.js';
 import { getSettings, updateSettings } from '../services/settings.js';
 import { emitStaff } from '../realtime/io.js';
 import { processAndStore, removeUpload, isLocalUpload } from '../services/uploads.js';
@@ -384,10 +384,34 @@ adminRoutes.patch('/settings',
   }));
 
 // ---------------------------------------------------------------- metrics
+// Every one of these takes the same window: ?period=today|yesterday|7d|30d,
+// or ?period=custom&from=YYYY-MM-DD&to=YYYY-MM-DD. Windows resolve in the
+// restaurant's timezone, not the server's.
+const rangeOf = (q) => ({ period: q.period, from: q.from, to: q.to });
+
+/** The whole dashboard in one request. */
+adminRoutes.get('/metrics/dashboard', asyncHandler(async (req, res) => {
+  res.json(await dashboard(rangeOf(req.query), { itemKey: req.query.item || null }));
+}));
+
+/** Just the headline tiles, for a lighter poll. */
+adminRoutes.get('/metrics/overview', asyncHandler(async (req, res) => {
+  res.json(await overview(rangeOf(req.query)));
+}));
+
+adminRoutes.get('/metrics/items', asyncHandler(async (req, res) => {
+  res.json(await topItems(rangeOf(req.query), req.query.limit));
+}));
+
+/** When one dish sells, hour by hour — the question behind the dashboard. */
+adminRoutes.get('/metrics/items/:key/profile', asyncHandler(async (req, res) => {
+  res.json(await itemProfile(rangeOf(req.query), req.params.key));
+}));
+
 adminRoutes.get('/metrics/daily', asyncHandler(async (req, res) => {
   res.json(await dailyMetrics(req.query.date));
 }));
 
 adminRoutes.get('/metrics/trend', asyncHandler(async (req, res) => {
-  res.json({ trend: await revenueTrend(req.query.days) });
+  res.json(await revenueTrend(rangeOf(req.query)));
 }));
