@@ -6,7 +6,7 @@ import StaffShell from '@/components/staff/StaffShell';
 import { adminApi } from '@/lib/api';
 import { money, FOOD_TYPE_LABEL } from '@/lib/format';
 import type { Category, MenuItem } from '@/lib/types';
-import { EmptyState, FoodTypeMark, LoadingScreen, Sheet, Spinner, Toast, useToast } from '@/components/ui';
+import { DataError, EmptyState, FoodTypeMark, LoadingScreen, Sheet, Spinner, Toast, useToast } from '@/components/ui';
 import ImagePicker from '@/components/admin/ImagePicker';
 import FoodTile from '@/components/guest/FoodTile';
 
@@ -40,7 +40,7 @@ function MenuManager() {
   const [busy, setBusy] = useState(false);
 
   const { data: catData, mutate: refreshCats } = useSWR('admin-categories', () => adminApi.categories());
-  const { data: itemData, mutate: refreshItems, isLoading } = useSWR('admin-items', () => adminApi.menuItems());
+  const { data: itemData, error, mutate: refreshItems, isLoading } = useSWR('admin-items', () => adminApi.menuItems());
 
   const categories = catData?.categories ?? [];
   const items = itemData?.items ?? [];
@@ -148,6 +148,7 @@ function MenuManager() {
     }
   };
 
+  if (error && !itemData) return <DataError error={error} onRetry={() => refreshItems()} label="Menu" />;
   if (isLoading) return <LoadingScreen label="Loading the menu…" />;
 
   const rowEditor = (

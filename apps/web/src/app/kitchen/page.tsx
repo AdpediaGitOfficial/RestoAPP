@@ -7,7 +7,7 @@ import { staffApi, type PrintJob } from '@/lib/api';
 import { duration, minutesSince, time } from '@/lib/format';
 import { useRealtime } from '@/lib/socket';
 import type { Order } from '@/lib/types';
-import { EmptyState, LoadingScreen, Toast, useToast } from '@/components/ui';
+import { DataError, EmptyState, LoadingScreen, Toast, useToast } from '@/components/ui';
 
 const COLUMNS: { status: string; title: string; accent: string; dot: string; next?: string; nextLabel?: string }[] = [
   { status: 'PLACED', title: 'New', accent: 'border-l-amber-400', dot: 'bg-amber-400', next: 'ACCEPTED', nextLabel: 'Accept' },
@@ -53,7 +53,7 @@ function KitchenBoard() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [, forceTick] = useState(0);
 
-  const { data, mutate, isLoading } = useSWR(
+  const { data, error, mutate, isLoading } = useSWR(
     'kitchen-orders',
     () => staffApi.orders({ active: true, limit: 200 }),
     { refreshInterval: 20_000 },
@@ -132,6 +132,7 @@ function KitchenBoard() {
     }
   };
 
+  if (error && !data) return <DataError error={error} onRetry={() => mutate()} label="Kitchen" />;
   if (isLoading) return <LoadingScreen label="Loading the kitchen board…" />;
 
   const orders = data?.orders ?? [];

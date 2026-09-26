@@ -6,7 +6,7 @@ import StaffShell from '@/components/staff/StaffShell';
 import { staffApi } from '@/lib/api';
 import { dateTime, money, todayIso } from '@/lib/format';
 import type { Bill } from '@/lib/types';
-import { LoadingScreen, Toast, useToast } from '@/components/ui';
+import { DataError, LoadingScreen, Toast, useToast } from '@/components/ui';
 
 const STATUS_STYLE: Record<string, string> = {
   SETTLED: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
@@ -21,7 +21,7 @@ function BillsRegister() {
   const [to, setTo] = useState(todayIso());
   const [status, setStatus] = useState('');
 
-  const { data, mutate, isLoading } = useSWR(
+  const { data, error, mutate, isLoading } = useSWR(
     ['bills', from, to, status],
     () => staffApi.bills({
       from: `${from}T00:00:00`,
@@ -32,6 +32,7 @@ function BillsRegister() {
     }),
   );
 
+  if (error && !data) return <DataError error={error} onRetry={() => mutate()} label="Bills" />;
   if (isLoading) return <LoadingScreen label="Loading bills…" />;
 
   const bills = data?.bills ?? [];

@@ -12,7 +12,7 @@ import Icon from '@/components/Icon';
 import { adminApi } from '@/lib/api';
 import { money, todayIso } from '@/lib/format';
 import { useRealtime } from '@/lib/socket';
-import { LoadingScreen } from '@/components/ui';
+import { DataError, LoadingScreen } from '@/components/ui';
 import type { Kpi as KpiData, TopItem } from '@/lib/types';
 
 /** Format a KPI for display; the API says which kind of number it is. */
@@ -44,7 +44,7 @@ function Dashboard() {
   const [item, setItem] = useState<string | null>(null);
 
   const q = { period, ...(period === 'custom' ? custom : {}), item };
-  const { data, mutate, isLoading } = useSWR(
+  const { data, error, mutate, isLoading } = useSWR(
     ['dashboard', period, custom.from, custom.to, item],
     () => adminApi.dashboard(q),
     { refreshInterval: period === 'today' ? 60_000 : 0, keepPreviousData: true },
@@ -52,6 +52,8 @@ function Dashboard() {
 
   useRealtime({ 'bill:settled': () => period === 'today' && mutate() }, { staff: true });
 
+  // An error with no data is a dead end, so say so instead of spinning.
+  if (error && !data) return <DataError error={error} onRetry={() => mutate()} label="Analytics" />;
   if (isLoading || !data) return <LoadingScreen label="Crunching the numbers…" />;
 
   const { kpis, topItems, itemProfile, trend, categories, payments, staff, live } = data;

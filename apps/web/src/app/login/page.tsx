@@ -28,11 +28,16 @@ const FEATURES: { icon: IconName; title: string; note: string }[] = [
 ];
 
 /**
- * Where the tiles take you. This is a destination, not a permission: the role
- * on the token is what actually grants access, and StaffShell turns away
- * anyone who reaches a screen their role does not cover. Asking for a screen
- * you are not entitled to simply lands you on your own, so a wrong tap can
- * never lock anyone out.
+ * Where the tiles take you — one per role the app actually has, each landing
+ * on that role's home screen. A fourth "Manager" tile used to sit here with
+ * no role behind it, and the Admin tile pointed at Settings, so an admin who
+ * picked the tile named after their job arrived at a configuration page
+ * rather than their dashboard.
+ *
+ * This is a destination, not a permission: the role on the token is what
+ * grants access, and StaffShell turns away anyone who reaches a screen their
+ * role does not cover. Asking for a screen you are not entitled to simply
+ * lands you on your own, so a wrong tap can never lock anyone out.
  */
 const DESTINATIONS: {
   key: string;
@@ -44,8 +49,7 @@ const DESTINATIONS: {
 }[] = [
   { key: 'staff', icon: 'user', label: 'Staff', note: 'Orders & Billing', href: '/supervisor', roles: ['SUPERVISOR', 'ADMIN'] },
   { key: 'kitchen', icon: 'flame', label: 'Kitchen', note: 'View Orders', href: '/kitchen', roles: ['KITCHEN', 'SUPERVISOR', 'ADMIN'] },
-  { key: 'manager', icon: 'chart', label: 'Manager', note: 'Reports & Menu', href: '/admin', roles: ['ADMIN'] },
-  { key: 'admin', icon: 'sliders', label: 'Admin', note: 'All Settings', href: '/admin/settings', roles: ['ADMIN'] },
+  { key: 'admin', icon: 'chart', label: 'Admin', note: 'Dashboard & reports', href: '/admin', roles: ['ADMIN'] },
 ];
 
 /** Where a role lands when the tile it chose is not open to it. */
@@ -203,7 +207,7 @@ function LoginForm() {
         <div
           role="radiogroup"
           aria-label="Select your role"
-          className="grid grid-cols-2 gap-2.5 sm:grid-cols-4"
+          className="grid grid-cols-3 gap-2.5"
         >
           {DESTINATIONS.map((d) => {
             const on = d.key === dest.key;

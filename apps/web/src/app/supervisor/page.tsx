@@ -8,7 +8,7 @@ import { staffApi } from '@/lib/api';
 import { elapsed, money } from '@/lib/format';
 import { useRealtime } from '@/lib/socket';
 import type { AppNotification, TableBoardRow } from '@/lib/types';
-import { LoadingScreen, Toast, useToast } from '@/components/ui';
+import { DataError, LoadingScreen, Toast, useToast } from '@/components/ui';
 
 const STATUS_STYLE: Record<string, { ring: string; badge: string; label: string }> = {
   FREE: { ring: 'ring-slate-200', badge: 'bg-slate-100 text-slate-600 ring-slate-200', label: 'Free' },
@@ -21,7 +21,7 @@ function FloorView() {
   const toast = useToast();
   const [zone, setZone] = useState('ALL');
 
-  const { data, mutate, isLoading } = useSWR('floor', () => staffApi.tables(), { refreshInterval: 20_000 });
+  const { data, error, mutate, isLoading } = useSWR('floor', () => staffApi.tables(), { refreshInterval: 20_000 });
   const { data: notes, mutate: refreshNotes } = useSWR('notifications', () => staffApi.notifications(), { refreshInterval: 30_000 });
 
   useRealtime(
@@ -43,6 +43,7 @@ function FloorView() {
     { staff: true },
   );
 
+  if (error && !data) return <DataError error={error} onRetry={() => mutate()} label="Floor" />;
   if (isLoading) return <LoadingScreen label="Loading the floor…" />;
 
   const tables = data?.tables ?? [];

@@ -2,19 +2,30 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ApiError, authApi, clearToken, getToken, readTokenClaims } from '@/lib/api';
 import type { Role, StaffUser } from '@/lib/types';
 import { LoadingScreen } from '@/components/ui';
 
+/**
+ * The main navigation, in the order the work happens: what the day looks
+ * like, then money, then the two live boards, then the things you set up
+ * once. Settings is not here — it lives under the account menu with the
+ * other things that belong to the person rather than the service.
+ */
 const NAV: { href: string; label: string; icon: string; roles: Role[] }[] = [
+  { href: '/admin', label: 'Dashboard', icon: '📊', roles: ['ADMIN'] },
+  { href: '/supervisor/bills', label: 'Bills', icon: '🧾', roles: ['SUPERVISOR', 'ADMIN'] },
   { href: '/kitchen', label: 'Kitchen', icon: '👨‍🍳', roles: ['KITCHEN', 'SUPERVISOR', 'ADMIN'] },
   { href: '/supervisor', label: 'Floor', icon: '🪑', roles: ['SUPERVISOR', 'ADMIN'] },
-  { href: '/supervisor/bills', label: 'Bills', icon: '🧾', roles: ['SUPERVISOR', 'ADMIN'] },
-  { href: '/admin', label: 'Dashboard', icon: '📊', roles: ['ADMIN'] },
   { href: '/admin/menu', label: 'Menu', icon: '🍽️', roles: ['ADMIN'] },
   { href: '/admin/tables', label: 'Tables & QR', icon: '🔲', roles: ['ADMIN'] },
   { href: '/admin/staff', label: 'Staff', icon: '👥', roles: ['ADMIN'] },
+];
+
+/** The account menu, behind the signed-in person's name. */
+const ACCOUNT: { href: string; label: string; icon: string; roles: Role[] }[] = [
+  { href: '/profile', label: 'Profile', icon: '👤', roles: ['KITCHEN', 'SUPERVISOR', 'ADMIN'] },
   { href: '/admin/settings', label: 'Settings', icon: '⚙️', roles: ['ADMIN'] },
 ];
 
@@ -35,6 +46,24 @@ export default function StaffShell({ children, requires, title, wide = false }: 
   const [user, setUser] = useState<StaffUser | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'denied'>('loading');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
+
+  // A menu that only closes by clicking its own button is a trap on a tablet,
+  // where there is no Escape key within reach and no obvious way back.
+  useEffect(() => {
+    if (!accountOpen) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!accountRef.current?.contains(e.target as Node)) setAccountOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setAccountOpen(false); };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [accountOpen]);
 
   const permitted = (role: Role) => role === 'ADMIN' || requires.includes(role);
 
@@ -77,6 +106,8 @@ export default function StaffShell({ children, requires, title, wide = false }: 
     // `requires` is a literal at every call site, so this runs once per screen.
   }, [router, pathname]);
 
+  useEffect(() => { setAccountOpen(false); setMenuOpen(false); }, [pathname]);
+
   const signOut = async () => {
     await authApi.logout().catch(() => {});
     clearToken();
@@ -99,6 +130,7 @@ export default function StaffShell({ children, requires, title, wide = false }: 
   }
 
   const nav = NAV.filter((n) => user.role === 'ADMIN' || n.roles.includes(user.role));
+  const account = ACCOUNT.filter((a) => user.role === 'ADMIN' || a.roles.includes(user.role));
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -127,11 +159,57 @@ export default function StaffShell({ children, requires, title, wide = false }: 
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">{user.name}</p>
-              <p className="text-xs capitalize text-slate-500 dark:text-slate-400">{user.role.toLowerCase()}</p>
+            <div className="relative" ref={accountRef}>
+              <button
+                type="button"
+                onClick={() => setAccountOpen((v) => !v)}
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                <span className="hidden sm:block">
+                  <span className="block text-sm font-semibold leading-tight text-slate-900 dark:text-slate-100">{user.name}</span>
+                  <span className="block text-xs capitalize text-slate-500 dark:text-slate-400">{user.role.toLowerCase()}</span>
+                </span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 dark:bg-slate-700 dark:text-brand-300">
+                  {user.name.trim().charAt(0).toUpperCase() || '?'}
+                </span>
+                <svg viewBox="0 0 12 12" aria-hidden className={`h-3 w-3 text-slate-400 transition-transform ${accountOpen ? 'rotate-180' : ''}`}>
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              {accountOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lift dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <p className="border-b border-slate-100 px-3 py-2 dark:border-slate-700 sm:hidden">
+                    <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">{user.name}</span>
+                    <span className="block text-xs capitalize text-slate-500">{user.role.toLowerCase()}</span>
+                  </p>
+                  {account.map((a) => (
+                    <Link
+                      key={a.href}
+                      href={a.href}
+                      role="menuitem"
+                      onClick={() => setAccountOpen(false)}
+                      className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <span className="mr-2" aria-hidden>{a.icon}</span>{a.label}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={signOut}
+                    className="block w-full border-t border-slate-100 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+                  >
+                    <span className="mr-2" aria-hidden>🚪</span>Sign out
+                  </button>
+                </div>
+              )}
             </div>
-            <button type="button" onClick={signOut} className="btn-ghost btn-sm">Sign out</button>
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}

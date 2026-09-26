@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ApiError } from '@/lib/api';
 
 export function Spinner({ className = 'h-5 w-5' }: { className?: string }) {
   return (
@@ -29,6 +30,53 @@ export function EmptyState({ icon = '🍽️', title, hint, action }: {
       <p className="font-semibold text-slate-700">{title}</p>
       {hint && <p className="max-w-sm text-sm text-slate-500">{hint}</p>}
       {action && <div className="mt-2">{action}</div>}
+    </div>
+  );
+}
+
+/**
+ * Turn a failed request into something a person on the floor can act on.
+ *
+ * The generic "something went wrong" is the least useful thing a screen can
+ * say. These three cases are the ones that actually happen in a restaurant
+ * deployment, and each has a different answer, so each gets its own sentence.
+ */
+export function describeError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 404) {
+      return 'This screen asked the server for something it does not have. '
+        + 'The app has been updated but the server has not — it needs restarting.';
+    }
+    if (err.status === 401 || err.status === 403) {
+      return 'Your sign-in is no longer valid for this screen. Sign out and back in.';
+    }
+    if (err.status >= 500) {
+      return `The server could not answer: ${err.message}`;
+    }
+    return err.message;
+  }
+  // fetch() rejects with a TypeError when it cannot reach the host at all.
+  if (err instanceof TypeError) {
+    return 'Cannot reach the server. Check the connection, then try again.';
+  }
+  return err instanceof Error ? err.message : 'Something went wrong loading this screen.';
+}
+
+/**
+ * What a screen shows when its data never arrived.
+ *
+ * Every data screen used to render its loading spinner whenever `data` was
+ * undefined, which is also true forever after a failure — so a 404 or an
+ * unreachable API looked exactly like a slow connection, with nothing to
+ * click and nothing to read.
+ */
+export function DataError({ error, onRetry, label }: {
+  error: unknown; onRetry?: () => void; label?: string;
+}) {
+  return (
+    <div className="mx-auto max-w-lg py-10">
+      {label && <h2 className="mb-2 text-lg font-bold text-ink-800">{label}</h2>}
+      <ErrorNote message={describeError(error)} onRetry={onRetry} />
     </div>
   );
 }
