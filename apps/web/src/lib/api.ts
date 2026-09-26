@@ -31,9 +31,28 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000
 
 const TOKEN_KEY = 'resto.staff.token';
 
-export const getToken = () => (typeof window === 'undefined' ? null : localStorage.getItem(TOKEN_KEY));
-export const setToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
-export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+/**
+ * "Remember me" decides which store the token lands in. Session storage is
+ * emptied when the browser closes, which is what a shared counter tablet
+ * wants; local storage survives, which is what a manager's own laptop wants.
+ * Reads check session first, so the shorter-lived choice always wins.
+ */
+export const getToken = () =>
+  typeof window === 'undefined'
+    ? null
+    : sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY);
+
+export const setToken = (t: string, remember = true) => {
+  // Clear both first, so switching the box off cannot leave a stale copy
+  // behind in the store we are no longer writing to.
+  clearToken();
+  (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
+};
+
+export const clearToken = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+};
 
 /**
  * Read the claims out of the stored JWT without a network call.
