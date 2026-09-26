@@ -53,16 +53,20 @@ const homeFor = (role: Role) =>
   role === 'KITCHEN' ? '/kitchen' : role === 'SUPERVISOR' ? '/supervisor' : '/admin';
 
 /**
- * The hero photograph is optional. It layers under two scrims, so if
- * public/login-hero.jpg is absent the request 404s, the layer is dropped and
- * the gradient below carries the panel on its own — drop the file in and it
- * appears, with no code change.
+ * The hero photograph sits under two scrims: one that darkens the left third
+ * so the headline stays readable over whatever is in the shot, and a crimson
+ * glow at the bottom. The gradient underneath is not redundant — if the image
+ * ever fails to load the browser drops that layer and the panel still reads.
  */
 const HERO: React.CSSProperties = {
   backgroundImage: [
-    'linear-gradient(100deg, rgb(20 20 24 / 0.90) 10%, rgb(20 20 24 / 0.50) 58%, rgb(20 20 24 / 0.74) 100%)',
-    'radial-gradient(120% 90% at 8% 100%, rgb(217 43 60 / 0.34), transparent 58%)',
-    "url('/login-hero.jpg')",
+    // Horizontal: darkest under the headline on the left.
+    'linear-gradient(100deg, rgb(20 20 24 / 0.90) 10%, rgb(20 20 24 / 0.58) 58%, rgb(20 20 24 / 0.78) 100%)',
+    // Vertical: the body copy and the tiles sit low, where the room is
+    // brightest, so the bottom needs more cover than the top.
+    'linear-gradient(180deg, rgb(20 20 24 / 0.20) 0%, rgb(20 20 24 / 0.20) 30%, rgb(20 20 24 / 0.64) 100%)',
+    'radial-gradient(120% 90% at 8% 100%, rgb(217 43 60 / 0.30), transparent 58%)',
+    "url('/login-hero.webp')",
     'linear-gradient(155deg, #26262C, #131317)',
   ].join(','),
   backgroundSize: 'cover',
@@ -86,7 +90,7 @@ function BrandPanel() {
         {/* The story appears from tablet width up. On a phone the panel is
             just a header strip so the form starts immediately. */}
         <div className="hidden md:block">
-          <p className="mt-12 text-[12px] font-bold uppercase tracking-[0.22em] text-brand-300 lg:mt-20">
+          <p className="mt-12 text-[12px] font-bold uppercase tracking-[0.22em] text-brand-200 lg:mt-20">
             Restaurant management system
           </p>
           <h1 className="mt-4 text-[clamp(2.25rem,4.6vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.035em]">
@@ -109,13 +113,13 @@ function BrandPanel() {
                   <Icon name={f.icon} className="h-4 w-4 text-white" />
                 </span>
                 <p className="text-[13px] font-semibold">{f.title}</p>
-                <p className="mt-0.5 text-[11px] text-white/70">{f.note}</p>
+                <p className="mt-0.5 text-[11px] text-white/85">{f.note}</p>
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="mt-1.5 text-sm text-white/70 md:hidden">
+        <p className="mt-1.5 text-sm text-white/85 md:hidden">
           Kitchen, floor supervisors and admins
         </p>
       </div>
@@ -133,7 +137,7 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [reveal, setReveal] = useState(false);
-  const [note, setNote] = useState<'reset' | 'qr' | null>(null);
+  const [showReset, setShowReset] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -263,15 +267,15 @@ function LoginForm() {
             </label>
             <button
               type="button"
-              onClick={() => setNote((n) => (n === 'reset' ? null : 'reset'))}
-              aria-expanded={note === 'reset'}
+              onClick={() => setShowReset((v) => !v)}
+              aria-expanded={showReset}
               className="text-[13px] font-semibold text-brand-600 hover:text-brand-700"
             >
               Forgot password?
             </button>
           </div>
 
-          {note === 'reset' && (
+          {showReset && (
             <p className="rounded-xl bg-ink-100 px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-600">
               Passwords are reset by an admin, under <strong className="font-semibold">Admin
               &rarr; Staff</strong>. Ask whoever manages the account to set you a new one.
@@ -302,30 +306,6 @@ function LoginForm() {
             )}
           </button>
         </form>
-
-        <div className="my-5 flex items-center gap-3.5 text-[11px] text-ink-500">
-          <span className="h-px flex-1 bg-ink-200" />
-          or
-          <span className="h-px flex-1 bg-ink-200" />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setNote((n) => (n === 'qr' ? null : 'qr'))}
-          aria-expanded={note === 'qr'}
-          className="btn-secondary h-[3.25rem] w-full justify-start gap-3 text-[13px]"
-        >
-          <Icon name="qr" className="h-[18px] w-[18px] text-ink-500" />
-          Sign in with QR Code
-          <Icon name="chevronRight" className="ml-auto h-4 w-4 text-ink-400" />
-        </button>
-
-        {note === 'qr' && (
-          <p className="mt-2.5 rounded-xl bg-ink-100 px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-600">
-            QR sign-in is not switched on yet — use your email and password above. (The QR codes
-            on the tables are for guests, and need no login.)
-          </p>
-        )}
 
         <p className="mt-7 text-center text-[11px] text-ink-500">
           RestoApp · Restaurant Management System

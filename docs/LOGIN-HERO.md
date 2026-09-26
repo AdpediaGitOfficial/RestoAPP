@@ -1,17 +1,22 @@
 # Static assets
 
-Served from the site root: `apps/web/public/foo.jpg` → `/foo.jpg`.
+`apps/web/public` is served from the site root: `apps/web/public/foo.webp` →
+`/foo.webp`. Everything in it is public, so keep notes like this one out.
 
-## login-hero.jpg
+## login-hero.webp
 
-The photograph behind the left-hand panel on `/login`. It is **optional**:
-the panel layers it under two scrims and over a gradient, so if the file is
-absent the browser drops that one layer and the gradient carries the panel.
-Drop the file in and it appears — no code change.
+The photograph behind the left-hand panel on `/login`. 1800x1200, WebP
+quality 58, ~182 KB — it sits under a 0.5–0.9 black scrim, so fine detail is
+invisible and a low quality setting costs nothing visible while keeping the
+sign-in screen light.
 
-What works well:
-  * A wide room shot, landscape, 2000px or wider.
-  * Detail on the right, calm on the left — the headline sits over the left
-    third, and the scrim is heaviest there.
-  * Keep it under ~300 KB. To convert:
-      npx sharp-cli -i room.jpg -o login-hero.jpg resize 2000 --fit inside -- jpeg --quality 78
+The panel layers it over a gradient, so if the file is ever missing or fails
+to decode the browser drops that layer and the panel still reads.
+
+To replace it, prefer a wide room shot with the detail on the right — the
+headline sits over the left third, where the scrim is heaviest:
+
+    node -e "require('sharp')('room.jpg')
+      .resize(1800, null, { withoutEnlargement: true })
+      .webp({ quality: 58 })
+      .toFile('apps/web/public/login-hero.webp')"
