@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { authApi, setToken } from '@/lib/api';
+import { authApi, readTokenClaims, setToken } from '@/lib/api';
 import { Spinner } from '@/components/ui';
 import Icon, { type IconName } from '@/components/Icon';
 import type { Role } from '@/lib/types';
@@ -140,6 +140,26 @@ function LoginForm() {
   const [showReset, setShowReset] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [resuming, setResuming] = useState(false);
+
+  /**
+   * Someone already signed in who types the bare domain should land where
+   * they work, not be asked for a password they already gave. The root
+   * redirects here, so without this every visit to resto.adpedia.in would
+   * show the form to a supervisor who is mid-shift.
+   *
+   * readTokenClaims returns null for a missing OR expired token, and the
+   * signature is not checked here — this only decides which screen to open.
+   * The server is still the authority: StaffShell verifies on arrival and,
+   * if the token is rejected, clears it and sends the user back here, where
+   * there is then nothing to resume and the form shows.
+   */
+  useEffect(() => {
+    const claims = readTokenClaims();
+    if (!claims) return;
+    setResuming(true);
+    router.replace(next && next !== '/login' ? next : homeFor(claims.role));
+  }, [next, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +179,17 @@ function LoginForm() {
       setBusy(false);
     }
   };
+
+  if (resuming) {
+    return (
+      <section className="flex items-center justify-center bg-ink-50 px-5 py-10">
+        <div className="card flex w-full max-w-[34rem] items-center gap-3 p-6 sm:p-10">
+          <Spinner className="h-5 w-5 text-brand-500" />
+          <p className="text-sm text-ink-600">You&rsquo;re already signed in — taking you through…</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="flex items-start justify-center bg-ink-50 px-5 py-10 lg:items-center lg:px-10 lg:py-12">
