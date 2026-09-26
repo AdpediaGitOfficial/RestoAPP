@@ -139,16 +139,33 @@ async function occupancy(from, end) {
   const { rows } = await query(
     `
     WITH active AS (SELECT COUNT(*)::int AS n FROM dining_tables WHERE is_active),
-    used AS (
+    spans AS (
       -- Only tables that count toward the denominator may count toward the
       -- numerator; a session on a retired table would otherwise push the
       -- figure past 100%.
-      SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (
-               LEAST(COALESCE(s.closed_at, now()), $2::timestamptz)
-             - GREATEST(s.opened_at, $1::timestamptz)))), 0) AS seconds
+      --
+      -- A session the sweep closed was not occupied until the sweep ran — it
+      -- was occupied until the guests stopped ordering, and then sat open
+      -- because nobody closed it. close_reason says the timestamp cannot be
+      -- taken at face value, so the span ends at the last real activity
+      -- instead. Without this one abandoned table reads as 100% occupancy
+      -- for every window it touches, which is as long as thirty days.
+      SELECT s.opened_at AS started,
+             CASE
+               WHEN s.close_reason IS NOT NULL
+                 THEN GREATEST(s.opened_at, COALESCE(
+                        (SELECT MAX(o.created_at) FROM orders o WHERE o.session_id = s.id),
+                        s.opened_at))
+               ELSE COALESCE(s.closed_at, now())
+             END AS ended
         FROM table_sessions s
         JOIN dining_tables t ON t.id = s.table_id AND t.is_active
-       WHERE s.opened_at < $2 AND COALESCE(s.closed_at, now()) > $1
+    ),
+    used AS (
+      SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (
+               LEAST(ended, $2::timestamptz) - GREATEST(started, $1::timestamptz)))), 0) AS seconds
+        FROM spans
+       WHERE started < $2 AND ended > $1
     )
     SELECT CASE
              WHEN active.n = 0 OR $2::timestamptz <= $1::timestamptz THEN 0

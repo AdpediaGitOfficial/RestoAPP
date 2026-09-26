@@ -156,6 +156,27 @@ try {
   const shareSum = items.items.reduce((a, i) => a + i.share_quantity, 0);
   check('item shares total ~100%', Math.abs(shareSum - 100) < 1.5, `${shareSum.toFixed(1)}%`);
 
+  // ---- an abandoned table does not read as an occupied one ---------------
+  // A session the sweep closed sat open long after its guests left. Counting
+  // it to closed_at pins occupancy at 100% for every window it touches.
+  const { rows: [spans] } = await query(`
+    SELECT COUNT(*)::int AS auto_closed,
+           COUNT(*) FILTER (WHERE closed_at > last_activity + interval '1 minute')::int AS shortened,
+           COUNT(*) FILTER (WHERE last_activity > closed_at)::int AS impossible
+      FROM (
+        SELECT s.closed_at,
+               GREATEST(s.opened_at, COALESCE(
+                 (SELECT MAX(o.created_at) FROM orders o WHERE o.session_id = s.id), s.opened_at)) AS last_activity
+          FROM table_sessions s WHERE s.close_reason IS NOT NULL
+      ) x`);
+  if (spans.auto_closed) {
+    check('a swept session stops counting at its last activity, not at the sweep',
+      spans.shortened > 0, `${spans.shortened} of ${spans.auto_closed} shortened`);
+    check('no session counts occupancy past the moment it closed', spans.impossible === 0);
+  } else {
+    console.log('SKIP  abandoned-span checks (no auto-closed sessions on this database)');
+  }
+
   // ---- occupancy is a percentage, always ---------------------------------
   for (const period of ['today', 'yesterday', '7d', '30d']) {
     const o = await overview({ period });
