@@ -91,6 +91,33 @@ function Dashboard() {
         ))}
       </section>
 
+      <section className="card p-5" aria-label="Right now">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-ink-800">Right now</h3>
+            <p className="text-sm text-ink-500">Live across the floor, whichever period is selected</p>
+          </div>
+          <Link href="/supervisor" className="btn-secondary btn-sm shrink-0">Open the floor</Link>
+        </div>
+        <div className="flex flex-wrap gap-x-8 gap-y-3">
+          {([
+            ['Open tables', live.open_tables, false],
+            ['Bill requests', live.bill_requests, live.bill_requests > 0],
+            ['In the kitchen', live.orders_in_kitchen, false],
+            ['Pending bills', live.pending_bills, live.pending_bills > 0],
+            ['Unbilled value', money(live.open_table_value, symbol), false],
+          ] as const).map(([k, v, waiting]) => (
+            <div key={k}>
+              <p className="text-xs text-ink-500">{k}</p>
+              <p className={`text-xl font-bold tabular-nums ${waiting ? 'text-brand-600' : 'text-ink-800'}`}>
+                {v}
+                {waiting && <span className="ml-1.5 align-middle text-[11px] font-semibold uppercase tracking-wide">waiting</span>}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ---------------------------------------- the item × time panel */}
       <section className="card p-5" aria-label="When an item sells">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -247,24 +274,6 @@ function Dashboard() {
       </div>
 
       {/* ---------------------------------------- live floor */}
-      <section className="card p-5" aria-label="Right now">
-        <h3 className="mb-3 font-bold text-ink-800">Right now</h3>
-        <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
-          {([
-            ['Open tables', live.open_tables],
-            ['Bill requests', live.bill_requests],
-            ['In the kitchen', live.orders_in_kitchen],
-            ['Pending bills', live.pending_bills],
-            ['Unbilled value', money(live.open_table_value, symbol)],
-          ] as const).map(([k, v]) => (
-            <div key={k}>
-              <p className="text-xs text-ink-500">{k}</p>
-              <p className="text-lg font-bold tabular-nums text-ink-800">{v}</p>
-            </div>
-          ))}
-          <Link href="/supervisor" className="btn-secondary btn-sm ml-auto self-center">Open the floor</Link>
-        </div>
-      </section>
     </div>
   );
 }
