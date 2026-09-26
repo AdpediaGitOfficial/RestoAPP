@@ -8,7 +8,8 @@ export type IconName =
   | 'search' | 'sliders' | 'plus' | 'minus' | 'check' | 'close' | 'chevronRight'
   | 'chevronDown' | 'arrowLeft' | 'pencil' | 'trash' | 'clock' | 'bell' | 'table'
   | 'receipt' | 'sparkle' | 'flame' | 'tray' | 'send' | 'cash' | 'card' | 'phone'
-  | 'wallet' | 'handshake' | 'info' | 'alert' | 'star' | 'leaf' | 'plate' | 'user';
+  | 'wallet' | 'handshake' | 'info' | 'alert' | 'star' | 'leaf' | 'plate' | 'user'
+  | 'lock' | 'eye' | 'eyeOff' | 'chart' | 'qr';
 
 const PATHS: Record<IconName, string> = {
   search: 'M11 4a7 7 0 1 0 4.2 12.6l3.6 3.6M11 4a7 7 0 0 1 4.2 12.6',
@@ -41,6 +42,11 @@ const PATHS: Record<IconName, string> = {
   leaf: 'M4 20C4 10 11 4 20 4c0 9-6 16-16 16zM4 20c3-4 6-6 10-8',
   plate: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 3.6-6 8-6s8 2 8 6',
+  lock: 'M6 10h12v10H6V10zm2 0V7a4 4 0 0 1 8 0v3M12 14v2.5',
+  eye: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  eyeOff: 'M4 4l16 16M9.9 5.8A8.6 8.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3.3 4M6.3 8.1A17 17 0 0 0 2.5 12S6 18.5 12 18.5c1 0 1.9-.2 2.7-.5M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  chart: 'M4 20V4M4 20h16M8 17v-5M12.5 17V8M17 17v-8',
+  qr: 'M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h2.5v2.5H14V14zm5.5 0H20v2.5h-.5V14zM14 19.5h2.5V20H14v-.5zm5.5-1H20V20h-3v-1.5h2.5z',
 };
 
 const FILLED = new Set<IconName>(['star', 'sparkle']);
