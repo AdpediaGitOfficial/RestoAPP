@@ -10,7 +10,7 @@ import { hourLabel } from '../src/lib/reporting.js';
  * the one thing unit tests cannot prove about a timezone.
  */
 
-import { pctChange, trendOf, tradingHours } from '../src/lib/reporting.js';
+import { pctChange, trendOf, tradingHours, looksLikeUuid } from '../src/lib/reporting.js';
 
 describe('pctChange', () => {
   test('reports a plain percentage move', () => {
@@ -97,5 +97,33 @@ describe('hourLabel', () => {
   test('has a short form for a crowded axis', () => {
     assert.equal(hourLabel(13, true), '1p');
     assert.equal(hourLabel(9, true), '9a');
+  });
+});
+
+describe('looksLikeUuid', () => {
+  test('accepts a real menu item id', () => {
+    assert.equal(looksLikeUuid('24d9188f-b29c-45ba-8398-44d39933b436'), true);
+    assert.equal(looksLikeUuid('24D9188F-B29C-45BA-8398-44D39933B436'), true);
+  });
+
+  test('rejects a 36-character name that is only hex-shaped', () => {
+    // The bug: this is 36 chars of hex, reached the ::uuid cast, and 500'd.
+    assert.equal(looksLikeUuid('a'.repeat(36)), false);
+    assert.equal(looksLikeUuid('-'.repeat(36)), false);
+  });
+
+  test('rejects dish names, including ones with dashes and digits', () => {
+    for (const name of ['Cold Brew', 'Chicken 65', 'Slow-Roast Lamb', '', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaag']) {
+      assert.equal(looksLikeUuid(name), false, name);
+    }
+  });
+
+  test('rejects a uuid with the groups mis-sized', () => {
+    assert.equal(looksLikeUuid('24d9188f-b29c-45ba-8398-44d39933b43'), false);   // 11 in the tail
+    assert.equal(looksLikeUuid('24d9188fb29c45ba839844d39933b436'), false);      // no dashes
+  });
+
+  test('rejects anything that is not a string', () => {
+    for (const v of [null, undefined, 42, {}, []]) assert.equal(looksLikeUuid(v), false);
   });
 });

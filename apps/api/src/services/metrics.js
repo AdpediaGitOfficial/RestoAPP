@@ -1,6 +1,6 @@
 import { query } from '../db/index.js';
 import { getSettings } from './settings.js';
-import { pctChange, trendOf, tradingHours, hourLabel } from '../lib/reporting.js';
+import { pctChange, trendOf, tradingHours, hourLabel, looksLikeUuid } from '../lib/reporting.js';
 
 /**
  * Reporting for the owner's dashboard.
@@ -33,6 +33,14 @@ const isDate = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
 export async function resolveRange({ period = 'today', from, to } = {}, tz) {
   if (!PERIODS.has(period)) period = 'today';
   if (period === 'custom' && !(isDate(from) && isDate(to))) period = 'today';
+  // A backwards range is a slip, not a request for nothing. Reading it either
+  // way round beats silently reporting zeroes for a window that cannot exist.
+  if (period === 'custom' && from > to) [from, to] = [to, from];
+  // Only a custom window may carry dates. Postgres folds the date cast in the
+  // CASE arm it never takes, so an unparseable value left in $3 fails the
+  // whole statement even when the period has fallen back to today.
+  const fromArg = period === 'custom' ? from : null;
+  const toArg = period === 'custom' ? to : null;
 
   // `now() AT TIME ZONE tz` gives local wall-clock time; truncating that to a
   // day and converting back yields the instant local midnight actually was.
@@ -75,7 +83,7 @@ export async function resolveRange({ period = 'today', from, to } = {}, tz) {
       -- today is compared against half of yesterday.
       w_from - (w_to - w_from) + (LEAST(w_to, now_ts) - w_from) AS p_end
     FROM win`,
-    [tz, period, from ?? null, to ?? null],
+    [tz, period, fromArg, toArg],
   );
 
   const r = rows[0];
@@ -276,9 +284,10 @@ export async function itemProfile(rangeInput = {}, itemKey) {
   const tz = settings.timezone;
 
   // The key is a menu_item_id when the dish is still on the menu, and the
-  // snapshotted name when it is not.
-  const byId = /^[0-9a-f-]{36}$/i.test(itemKey);
-  const match = byId ? 'oi.menu_item_id = $3::uuid' : 'oi.item_name = $3';
+  // snapshotted name when it is not. The shape has to be checked properly:
+  // "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" is 36 characters of hex, and a
+  // looser test sent it to the uuid cast, which failed the request outright.
+  const match = looksLikeUuid(itemKey) ? 'oi.menu_item_id = $3::uuid' : 'oi.item_name = $3';
 
   const [hourly, weekday, totals] = await Promise.all([
     query(

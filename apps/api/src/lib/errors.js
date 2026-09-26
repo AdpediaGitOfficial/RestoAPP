@@ -34,6 +34,13 @@ export function errorHandler(err, _req, res, _next) {
   if (err?.code === '23505') {
     return res.status(409).json({ error: { code: 'CONFLICT', message: 'That record already exists', details: err.detail } });
   }
+  // 22P02 is Postgres refusing to read a value as the column's type — in
+  // practice a malformed id in the URL, from a stale link or a scanner.
+  // That is a request for something that cannot exist, not a fault on our
+  // side, and it should not read as one in the logs or to the caller.
+  if (err?.code === '22P02') {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'That record does not exist' } });
+  }
   if (err?.code === '23503') {
     return res.status(409).json({ error: { code: 'IN_USE', message: 'That record is referenced by other data and cannot be removed' } });
   }

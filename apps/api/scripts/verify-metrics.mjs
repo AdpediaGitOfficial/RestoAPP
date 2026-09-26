@@ -135,6 +135,22 @@ try {
     [range.from, range.end, range.previous.from, range.previous.end]);
   check('today so far is compared with yesterday to the same clock time', same === true);
 
+  // ---- malformed input is answered, not crashed --------------------------
+  const backwards = await resolveRange({ period: 'custom', from: '2026-09-26', to: '2026-09-01' }, tz);
+  check('a backwards custom range is read the right way round',
+    new Date(backwards.to) > new Date(backwards.from),
+    `${String(backwards.from).slice(0,10)} -> ${String(backwards.to).slice(0,10)}`);
+
+  const junk = await resolveRange({ period: 'custom', from: 'not-a-date', to: yesterday }, tz);
+  check('an unparseable date falls back instead of failing', junk.period === 'today', junk.period);
+
+  const missing = await itemProfile({ period: '30d' }, 'a'.repeat(36));
+  check('a 36-character dish name is not mistaken for an id', missing.item.quantity === 0);
+
+  const unknown = await itemProfile({ period: '30d' }, 'No Such Dish');
+  check('an unknown dish returns an empty profile, not an error',
+    unknown.item.quantity === 0 && unknown.peak_hour === null);
+
   // ---- shares are a share of something -----------------------------------
   const items = await topItems({ period: 'yesterday' }, 100);
   const shareSum = items.items.reduce((a, i) => a + i.share_quantity, 0);

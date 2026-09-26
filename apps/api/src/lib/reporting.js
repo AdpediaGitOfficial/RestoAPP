@@ -53,3 +53,18 @@ export function hourLabel(hour, short = false) {
   const suffix = hour < 12 ? (short ? 'a' : 'AM') : short ? 'p' : 'PM';
   return `${hour % 12 || 12}${short ? '' : ' '}${suffix}`;
 }
+
+/**
+ * Is this string a UUID, rather than a dish name that happens to look like
+ * one? Menu items are addressed by id while they are on the menu and by the
+ * name snapshotted on the order line once they are not, so the two have to be
+ * told apart before one of them reaches a `::uuid` cast.
+ *
+ * The full 8-4-4-4-12 shape is required. A count of hex characters is not
+ * enough: a 36-character name of all `a`s passes that and fails the cast,
+ * turning a lookup for a missing dish into a 500.
+ */
+export function looksLikeUuid(value) {
+  return typeof value === 'string'
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
